@@ -1,0 +1,24 @@
+{
+  "name": "fieldtrip-decision-tree",
+  "version": "0.0.1",
+  "homepage": "https://github.com/edina/fieldtrip-decision-tree",
+  "authors": [
+    "Panos Terzis <P.Terzis@ed.ac.uk>"
+  ],
+  "main": "src/www/js/dtree.js",
+  "keywords": [
+    "fieldtrip-open",
+    "decision",
+    "tree",
+    "earth",
+    "observation"
+  ],
+  "license": "BSD",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
