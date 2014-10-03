@@ -1,0 +1,12 @@
+{
+    "body": {
+        "previous": "prev",
+        "next": "next"
+    },
+    "popups": {
+        "popup1":{
+            "template": "dtree-popup.html",
+            "data": {}
+        }
+    }
+}
