@@ -35,14 +35,30 @@ DAMAGE.
 
 define(['./data'], function(tree){
     var page = 0;
+    var questionObj;
+    var answers = [];
 
-    var createQuestion = function(obj){
+    var createQuestion = function(q){
+        if(q){
+            $('#dtree-form').html(createQuestionOptions(q).join("")).parent().trigger('create');
+        }
+    };
+
+    var createQuestionOptions = function(obj){
         var fieldset = ['<fieldset data-role="controlgroup">'];
         fieldset.push('<legend>' + obj.name + '</legend>');
         $.each(obj.children, function(i,v){
-            fieldset.push('<label for="form-radio1-1">Radio</label>');
-            fieldset.push('<input name="form-radio1" id="form-radio1-1" value="Radio" type="radio" required="">');
+            if(v instanceof Array){
+                fieldset.push('<label for="'+v[1]+'">' + v[0] + '</label>');
+                fieldset.push('<input name="radio-' + obj.id + '" id="' + v[1] + '" value="' + v[0] + '" type="radio" required="">');
+            }
+            else{
+                fieldset.push('<label for="'+v+'">' + v + '</label>');
+                fieldset.push('<input name="radio-' + obj.id + '" id="' + v + '" value="' + v + '" type="radio" required="">');
+            }
         });
+        fieldset.push('</div>');
+        return fieldset;
     };
 
     /** Checks that i) something is selected ii) answer is implemented
@@ -65,33 +81,45 @@ define(['./data'], function(tree){
 
     /** Returns selected value or null if none selected */
     var getSelection = function(){
-        var name =  tree[page].legend; //for demo purposes
-        var selected = $('input[name="' + name + '"]:checked', '#biosos-form').val();
+        var selected = {
+            "value": $('input[name="radio-' + tree[page].id + '"]:checked', '#dtree-form').val(),
+            "id": $('input[name="radio-' + tree[page].id + '"]:checked', '#dtree-form').prop('id')
+        };
         return selected || null;
     };
 
-    var getStartingQuestion = function(){
+    /**
+     * function for getting the question from data
+     * @param key: the id of the question
+     * @returns: the question object
+     */
+    var getQuestion = function(key){
         for(var i=0; i<tree.length; i++){
-            if(tree[i].parent === null){
+            if(tree[i].id === key){
                 return tree[i];
             }
         }
-        return undefined;
+        return;
     };
 
     /**
      * function for initializing the questionnaire
      */
     var initQuestionnaire = function(){
-        var q = getStartingQuestion();
+        var q = getQuestion('root');
         if(q){
-            $("#dtree-form").html(q.name);
+            setQuestion(q);
+            createQuestion(q);
         }
     };
 
      /* popup a msg */
     var popup = function(msg){
         $('#popup-text').text(msg).parent().popup('open');
+    };
+
+    var setQuestion = function(q){
+        questionObj = q;
     };
 
     /*********EVENTS************/
@@ -106,7 +134,27 @@ define(['./data'], function(tree){
         'vclick',
         '#dtree-next',
         function(){
-            
+            //if(checkAnswer() && page >= tree.length - 1){
+            //    $("#dtree-popup").popup('open');
+            //    return;
+            //}
+            var answer = getSelection();
+            console.log(answer)
+            //store the answer in an array
+            answers.push({"id": questionObj.id, "answer": answer, "hasChildren": (questionObj.children[0] instanceof Array)});
+            page++;
+            console.log(tree[page])
+            if(questionObj.parent === tree[page].parent){
+                createQuestion(tree[page]);
+            }
+            else{
+                for(var i=answers.length; i>0; i--){
+                    if(answers[i].hasChildren && answers[i].answer.id === answers[i].id){
+                        
+                    }
+                }
+                createQuestion(tree[page]);
+            }
         }
     );
 
