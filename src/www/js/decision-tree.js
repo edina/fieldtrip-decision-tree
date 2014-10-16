@@ -33,59 +33,144 @@ DAMAGE.
 
 /* jshint multistr: true */
 
-define(['./data'], function(tree){
-    var page = 0;
+define(['./data2'], function(tree){
+    //the first page
+    var page = "root";
+    //the object of the current question
     var questionObj;
+    //an array of all the answers
     var answers = [];
+    //the number of times that previous button is pressed, need restriction
+    var previous = 0;
 
-    var createQuestion = function(q){
+    var createQuestion = function(q, choice){
         if(q){
-            $('#dtree-form').html(createQuestionOptions(q).join("")).parent().trigger('create');
+            $('#dtree-form').html(createQuestionOptions(q, choice).join("")).parent().trigger('create');
         }
     };
 
-    var createQuestionOptions = function(obj){
-        var fieldset = ['<fieldset data-role="controlgroup">'];
-        fieldset.push('<legend>' + obj.name + '</legend>');
-        $.each(obj.children, function(i,v){
-            if(v instanceof Array){
-                fieldset.push('<label for="'+v[1]+'">' + v[0] + '</label>');
-                fieldset.push('<input name="radio-' + obj.id + '" id="' + v[1] + '" value="' + v[0] + '" type="radio" required="">');
-            }
-            else{
-                fieldset.push('<label for="'+v+'">' + v + '</label>');
-                fieldset.push('<input name="radio-' + obj.id + '" id="' + v + '" value="' + v + '" type="radio" required="">');
-            }
-        });
-        fieldset.push('</div>');
+    var createQuestionOptions = function(obj, choice){
+        var fieldset;
+        if(obj.children instanceof Array) {
+            fieldset = ['<fieldset data-role="controlgroup">'];
+            fieldset.push('<legend>' + obj.name + '</legend>');
+            $.each(obj.children, function(i,v){
+                var id;
+                if(v[1] !== null){
+                    fieldset.push('<label for="'+v[1]+'">' + v[0] + '</label>');
+                    id = v[1];
+                    if(choice && choice === v[0]){
+                        fieldset.push('<input name="radio-' + page + '" id="' + id + '" value="' + v[0] + '" type="radio" required="" checked="checked">');
+                    }
+                    else{
+                        fieldset.push('<input name="radio-' + page + '" id="' + id + '" value="' + v[0] + '" type="radio" required="">');
+                    }
+                }
+                else{
+                    fieldset.push('<label for="'+v[0]+'">' + v[0] + '</label>');
+                    id = v[0];
+                    if(choice && choice === v[0]){
+                        fieldset.push('<input name="radio-' + page + '" id="' + id + '" value="' + v[0] + '" type="radio" required="" checked="checked">');
+                    }
+                    else{
+                        fieldset.push('<input name="radio-' + page + '" id="' + id + '" value="' + v[0] + '" type="radio" required="">');
+                    }
+                }
+            });
+            fieldset.push('</div>');
+        }
+        else if(obj.children === 'integer'){
+            fieldset = ['<label for="'+ page +'">'+obj.name+'</label>'];
+            fieldset.push('<input type="number" id="'+page+'" value="0">');
+        }
         return fieldset;
     };
 
-    /** Checks that i) something is selected ii) answer is implemented
+    /**
+     * Checks that i) something is selected ii) answer is implemented
      *  and shows relevant message.
      * Returns true/false to indicate correct/incorrect result
      */
     var checkAnswer = function(){
         var selected = getSelection();
-        var answer = tree[page].answer;
+        var answer = tree.questions[page].children;
         if (! selected ){ //no selection made
             popup("Please choose a class");
-            return false;
-        }
-        if ( selected != answer ){ //unimplemented selection made
-            popup("Only " + answer + " is implemented. Your choice was: " + selected );
             return false;
         }
         return true;
     };
 
+    var checkAnswerInAnswers = function(back){
+        var value;
+        var changed = false;
+        for(var i=answers.length-1; i>=0;i--){
+            if(answers[i].id === page){
+                if(back){
+                    page = answers[i-1].id;
+                    value = answers[i-1].answer.value;
+                }
+                else{
+                    page = answers[i].id;
+                    value = answers[i].answer.value;
+                }
+                changed = true;
+                break;
+            }
+        }
+        if(!changed && answers.length > 0 && back){
+            page = answers[answers.length-1].id;
+            value = answers[answers.length-1].answer.value;
+        }
+        return value;
+    };
+
+    var findNextQuestion = function(answer){
+        if("leadsTo" in questionObj){
+            var leadsTo = questionObj.leadsTo;
+            if(leadsTo instanceof Array){
+                page = questionObj.leadsTo;
+                for(var i=0; i<answers.length; i++){
+                    for(var j=0; j<page.length; j++){
+                        if(page[j].indexOf("-") && answers[i].answer.id.split("-")[0] === page[j]){
+                            page = answers[i].answer.id.split("-")[0];
+                        }
+                        else if(answers[i].answer.id === page[j]){
+                            page = answers[i].answer.id;
+                        }
+                    }
+                }
+            }
+            else{
+                page = questionObj.leadsTo;
+            }
+        }
+        else{
+            page = answer.id;
+        }
+    };
+
     /** Returns selected value or null if none selected */
     var getSelection = function(){
-        var selected = {
-            "value": $('input[name="radio-' + tree[page].id + '"]:checked', '#dtree-form').val(),
-            "id": $('input[name="radio-' + tree[page].id + '"]:checked', '#dtree-form').prop('id')
-        };
-        return selected || null;
+        var selected;
+        if(tree.questions[page].children instanceof Array){
+            selected = {
+                "value": $('input[name="radio-' + page + '"]:checked', '#dtree-form').val(),
+                "id": $('input[name="radio-' + page + '"]:checked', '#dtree-form').prop('id')
+            };
+        }
+        else{
+            selected = {
+                "value": $('input').val(),
+                "id": page
+            };
+        }
+        if(selected.value === undefined){
+            return null;
+        }
+        else{
+            return selected;
+        }
     };
 
     /**
@@ -94,9 +179,9 @@ define(['./data'], function(tree){
      * @returns: the question object
      */
     var getQuestion = function(key){
-        for(var i=0; i<tree.length; i++){
-            if(tree[i].id === key){
-                return tree[i];
+        for(var q in tree.questions){
+            if(q === key){
+                return tree.questions[q];
             }
         }
         return;
@@ -127,34 +212,43 @@ define(['./data'], function(tree){
         'vclick',
         '#dtree-prev',
         function(event){
-            
+            previous++;
+            var value = checkAnswerInAnswers(true);
+            createQuestion(tree.questions[page], value);
+            setQuestion(tree.questions[page]);
         }
     );
     $(document).on(
         'vclick',
         '#dtree-next',
         function(){
-            //if(checkAnswer() && page >= tree.length - 1){
-            //    $("#dtree-popup").popup('open');
-            //    return;
-            //}
+            //check if answer is selected
+            if(!checkAnswer()){
+                $("#dtree-popup").popup('open');
+                return;
+            }
             var answer = getSelection();
-            console.log(answer)
-            //store the answer in an array
-            answers.push({"id": questionObj.id, "answer": answer, "hasChildren": (questionObj.children[0] instanceof Array)});
-            page++;
-            console.log(tree[page])
-            if(questionObj.parent === tree[page].parent){
-                createQuestion(tree[page]);
-            }
-            else{
-                for(var i=answers.length; i>0; i--){
-                    if(answers[i].hasChildren && answers[i].answer.id === answers[i].id){
-                        
+            
+            var check =false;
+            for(var i=0; i<answers.length;i++){
+                if(answers[i].id === page){
+                    if(answer.value !== answers[i].answer.value){
+                        answers[i].answer = answer;
                     }
+                    check = true;
+                    break;
                 }
-                createQuestion(tree[page]);
             }
+            if(check === false){
+                //store the answer in an array
+                answers.push({"id": page, "answer": answer});
+            }
+            findNextQuestion(answer);
+            //get answer for the question if already exists
+            var value = checkAnswerInAnswers();
+
+            createQuestion(tree.questions[page], value);
+            setQuestion(tree.questions[page]);
         }
     );
 

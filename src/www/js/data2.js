@@ -37,11 +37,13 @@ define([], function(){
     var questions = {
         "root": {
             "name": "Is it ",
-            "children": [['Primarly vegetated', '1.0.0'], ['Primarly non-vegetated', '2.0.0']]
+            "children": [['Primarly vegetated', '1.0.0'], ['Primarly non-vegetated', '2.0.0']],
+            "leadsTo": "Base Class I"
         },
         "Base Class I": {
             "name": "Is it mostly",
-            "children": ["green", "brown", "burnt"]
+            "children": [["green", null], ["brown", null], ["burnt", null]],
+            "leadsTo": ["1.0.0", "2.0.0"]
         },
         "1.0.0": {
             "name": "Is it ",
@@ -49,131 +51,168 @@ define([], function(){
         },
         "1.1.0": {
             "name": "Is it ",
-            "children": [["cultivated/managed (Primarily vegetated, terrestrial cultivated/managed)", "1.1.1"], ["natural/semi-natural (Primarily vegetated, terrestrial natural/semi-natural)", "1.1.2"]]
+            "children": [["cultivated/managed (Primarily vegetated, terrestrial cultivated/managed)", "1.1.1"], ["natural/semi-natural (Primarily vegetated, terrestrial natural/semi-natural)", "1.1.2"]],
+            "leadsTo": "PV"
         },
         "1.2.0": {
             "name": "Is it ",
-            "children": [["Is it cultivated/managed (Primarily vegetated, aquatic/regularly flooded, cultivated/managed)", "1.2.1"], ["Is it natural/semi-natural (Primarily vegetated, aquatic/regularly flooded, natural/semi-natural)", "1.2.2"]]
+            "children": [["Is it cultivated/managed (Primarily vegetated, aquatic/regularly flooded, cultivated/managed)", "1.2.1"], ["Is it natural/semi-natural (Primarily vegetated, aquatic/regularly flooded, natural/semi-natural)", "1.2.2"]],
+            "leadsTo": "PV"
         },
         "PV": {
             "name": "Is it primarly ",
-            "children": [["Trees", "PV1"],["Bushes,shrubs", "PV2"],["Herbaceous plants(grasses and forbs)", "PV3"],["Succulents", "PV4"],["Lichens", "PV5"],["Mosses", "PV6"]]
+            "children": [["Trees", "PV.1"],["Bushes,shrubs", "PV.2.1"],["Herbaceous plants(grasses and forbs)", "PV.3.1"],["Succulents", "PV.1-1"],["Lichens", "PV.1-2"],["Mosses", "PV.1-3"]],
+            "leadsTo": ["PV.2.1", "PV.3.1", "PV.1"]
+        },
+        "PV.2.1": {
+            "name": "Is it ",
+            "children": [["Regular bushes", "PV2.1"], ["Dward Shrubs", "PV2.2"]],
+            "leadsTo": "PV.1"
+        },
+        "PV.3.1": {
+            "name": "Is it ",
+            "children": [["Regular graminaceous", "PV1.1"], ["Reeds", "PV1.2"], ["Forbs, ferns", "PV3.3"]],
+            "leadsTo": "PV.1"
         },
         "PV.1": {
             "name": "Is it ",
-            "children": [["Broadleaved", "PV1.1"], ["Coniferous", "PV1.2"], ["Palm Trees", "PV1.3"]]
+            "children": [["Broadleaved", "PV.1.1"], ["Coniferous", "PV.1.2"], ["Palm Trees", "PV.1.3"]],
+            "leadsTo": "PV.2"
         },
         "PV.2": {
             "name": "Name the leaf character",
-            "children": [["Sclerophyte", "PV"], ["Regular", ""]]
+            "children": [["Sclerophyte", "PV.2.1"], ["Regular", "PV.2.2"]],
+            "leadsTo": "PV.3"
         },
         "PV.3": {
             "name": "Describe the phenology",
-            "children": [["Annual", ""], ["Multiannual", ""], ["Permanent", ""], ["Evergreen", ""], ["Deciduous", ""]]
+            "children": [["Annual", null], ["Multiannual", null], ["Permanent", null], ["Evergreen", null], ["Deciduous", null]],
+            "leadsTo": "PV.4"
         },
         "PV.4": {
             "name": "What is the crown cover density (%)?",
-            "children": "integer"
+            "children": "integer",
+            "leadsTo": "PV.5"
         },
         "PV.5": {
             "name": "What is the vegetation height (m)?",
-            "children": "integer"
-        },
-        "PV2": {
-            "name": "Is it ",
-            "children": [["Regular bushes", "PV2.1"], ["Dward Shrubs", "PV2.2"]]
-        },
-        "PV3": {
-            "name": "Is it ",
-            "children": [["Regular graminaceous", "PV1.1"], ["Reeds", "PV1.2"], ["Forbs, ferns", "PV3.3"]]
+            "children": "integer",
+            "leadsTo": "PV.6"
         },
         "PV.6": {
             "name": "Is there a second layer of vegetation?",
-            "children": [["yes, but I don’t want to add more info on it", "PV"], ["no", null], ["yes and I will provide more info on that now", null]]
+            "children": [["yes, but I don’t want to add more info on it", null], ["no", null], ["yes and I will provide more info on that now", "PV"]],
+            "leadsTo": ["1.1.1_1.2.1_1", "end"]
         },
         "1.1.1_1.2.1_1": {
             "name": "What is the agricultural type?",
-            "children": [["Arable cropland", "1.1.1_1.2.1_1.1"], ["Permanent cropland", "1.1.1_1.2.1_1.2"], ["Permanent grassland", "1.1.1_1.2.1_1.3"]]
+            "children": [["Arable cropland", "1.1.1_1.2.1_1.1"], ["Permanent cropland", "1.1.1_1.2.1_1.2"], ["Permanent grassland", "1.1.1_1.2.1_1.3"]],
+            "leadsTo": "1.1.1_1.2.1_2"
         },
         "1.1.1_1.2.1_2": {
             "name": "What is the cultivation pattern?",
-            "children": [["Crop rotation", "1.1.1_1.2.1_2.1"], ["No crop rotation", "1.1.1_1.2.1_2.2"], ["Plantation", "1.1.1_1.2.1_2.3"], ["Extensive orchards", "1.1.1_1.2.1_2.4"], ["Agroforestry", "1.1.1_1.2.1_2.5"], ["Shifting cultivation (slash and burn)", "1.1.1_1.2.1_2.6"]]
+            "children": [["Crop rotation", "1.1.1_1.2.1_2.1"], ["No crop rotation", "1.1.1_1.2.1_2.2"], ["Plantation", "1.1.1_1.2.1_2.3"], ["Extensive orchards", "1.1.1_1.2.1_2.4"], ["Agroforestry", "1.1.1_1.2.1_2.5"], ["Shifting cultivation (slash and burn)", "1.1.1_1.2.1_2.6"]],
+            "leadsTo": "1.1.1_1.2.1_3"
         },
         "1.1.1_1.2.1_3": {
             "name": "Is there fertilizing?",
-            "children": [["Yes", "1.1.1_1.2.1_3.1"], ["No", "1.1.1_1.2.1_3.2"], ["Not sure", "1.1.1_1.2.1_3.3"]]
+            "children": [["Yes", "1.1.1_1.2.1_3.1"], ["No", "1.1.1_1.2.1_3.2"], ["Not sure", "1.1.1_1.2.1_3.3"]],
+            "leadsTo": "1.1.1_1.2.1_4" 
         },
         "1.1.1_1.2.1_4": {
             "name": "Is there irrigation?",
-            "children": [["Yes", "1.1.1_1.2.1_4.1"], ["No", "1.1.1_1.2.1_4.2"], ["Not sure", "1.1.1_1.2.1_4.3"]]
+            "children": [["Yes", "1.1.1_1.2.1_4.1"], ["No", "1.1.1_1.2.1_4.2"], ["Not sure", "1.1.1_1.2.1_4.3"]],
+            "leadsTo": "1.1.1_1.2.1_5" 
         },
         "1.1.1_1.2.1_5": {
             "name": "Is there mowing?",
-            "children": [["Yes", "1.1.1_1.2.1_5.1"], ["No", "1.1.1_1.2.1_5.2"], ["Not sure", "1.1.1_1.2.1_5.3"]]
+            "children": [["Yes", "1.1.1_1.2.1_5.1"], ["No", "1.1.1_1.2.1_5.2"], ["Not sure", "1.1.1_1.2.1_5.3"]],
+            "leadsTo": ["1.1.1_1.2.1_5.1", "1.1.1_1.2.1_6"]
+        },
+        "1.1.1_1.2.1_5.1": {
+            "name": "Is it intense?",
+            "children": [["yes", null], ["no", null]],
+            "leadsTo": "1.1.1_1.2.1_6"
         },
         "1.1.1_1.2.1_6": {
             "name": "Is there grazing?",
-            "children": [["Yes", "1.1.1_1.2.1_6.1"], ["No", "1.1.1_1.2.1_6.2"], ["Not sure", "1.1.1_1.2.1_6.3"]]
+            "children": [["Yes", "1.1.1_1.2.1_6.1"], ["No", "1.1.1_1.2.1_6.2"], ["Not sure", "1.1.1_1.2.1_6.3"]],
+            "leadsTo": ["1.1.1_1.2.1_6.1", "1.1.1_1.2.1_7"]
+        },
+        "1.1.1_1.2.1_6.1": {
+            "name": "Is it intense?",
+            "children": [["yes", null], ["no", null]],
+            "leadsTo": "1.1.1_1.2.1_7"
         },
         "1.1.1_1.2.1_7": {
             "name": "Is there drainage?",
-            "children": [["Yes", "1.1.1_1.2.1_7.1"], ["No", "1.1.1_1.2.1_7.2"], ["Not sure", "1.1.1_1.2.1_7.3"]]
+            "children": [["Yes", "1.1.1_1.2.1_7.1"], ["No", "1.1.1_1.2.1_7.2"], ["Not sure", "1.1.1_1.2.1_7.3"]],
+            "leadsTo": "1.1.1_1.2.1_8"
         },
         "1.1.1_1.2.1_8": {
-            "name": "Is it intense?",
-            "children": [["Yes", "1.1.1_1.2.1_8.1"], ["No", "1.1.1_1.2.1_8.2"], ["Not sure", "1.1.1_1.2.1_8.3"]]
+            "name": "Is there drainage?",
+            "children": [["Yes", "1.1.1_1.2.1_8.1"], ["No", "1.1.1_1.2.1_8.2"], ["Not sure", "1.1.1_1.2.1_8.3"]],
+            "leadsTo": "1.1.1_1.2.1_9"
         },
         "1.1.1_1.2.1_9": {
-            "name": "Is there drainage?",
-            "children": [["Yes", "1.1.1_1.2.1_9.1"], ["No", "1.1.1_1.2.1_9.2"], ["Not sure", "1.1.1_1.2.1_9.3"]]
+            "name": "Is the land managed as a forest?",
+            "children": [["Yes", "1.1.1_1.2.1_9.1"], ["No", "1.1.1_1.2.1_9.2"], ["Not sure", "1.1.1_1.2.1_9.3"], ["Other", "1.1.1_1.2.1_9.4"]],
+            "leadsTo": ["1.1.1_1.2.1_9.1", "1.1.1_1.2.1_11"]
+        },
+        "1.1.1_1.2.1_9.1": {
+            "name": "Is it managed for wood production?",
+            "children": [["Yes", "1.1.1_1.2.1_9.1.1"], ["No", "1.1.1_1.2.1_9.1.2"], ["Not sure", "1.1.1_1.2.1_9.1.3"]],
+            "leadsTo": ["1.1.1_1.2.1_9.1.1", "1.1.1_1.2.1_9.1.2"]
+        },
+        "1.1.1_1.2.1_9.1.1": {
+            "name": "Is it ",
+            "children": [["Is it a plantation (i.e. plantation, monoculture, large clearcuts, strong soil preparation, short cycles)", "1.1.1_1.2.1_10.1.1.1"], ["Is it regular forestry with clearcuts possible?", "1.1.1_1.2.1_10.1.1.2"]],
+            "leadsTo": "1.1.1_1.2.1_9.2"
+        },
+        "1.1.1_1.2.1_9.2": {
+            "name": "Is it multifunctional?",
+            "children": [["Yes", "1.1.1_1.2.1_9.2.1"], ["No", "1.1.1_1.2.1_9.2.2"], ["Not sure", "1.1.1_1.2.1_9.2.3"]],
+            "leadsTo": "1.1.1_1.2.1_10"
         },
         "1.1.1_1.2.1_10": {
-            "name": "Is the land managed as a forest?",
-            "children": [["Yes", "1.1.1_1.2.1_10.1"], ["No", "1.1.1_1.2.1_10.2"], ["Not sure", "1.1.1_1.2.1_10.3"], ["Other", "1.1.1_1.2.1_10.4"]]
+            "name": "Is the land managed as cropland? ",
+            "children": [["Yes", "1.1.1_1.2.1_10.1"], ["No", "1.1.1_1.2.1_10.2"], ["Not sure", "1.1.1_1.2.1_10.3"]],
+            "leadsTo": ["1.1.1_1.2.1_10.1", "1.1.1_1.2.1_11"]
         },
         "1.1.1_1.2.1_10.1": {
-            "name": "Is it managed for wood production?",
-            "children": [["Yes", "1.1.1_1.2.1_10.1.1"], ["No", "1.1.1_1.2.1_10.1.2"], ["Not sure", "1.1.1_1.2.1_10.1.3"]]
-        },
-        "1.1.1_1.2.1_10.1.1": {
-            "name": "Is it ",
-            "children": [["Is it a plantation (i.e. plantation, monoculture, large clearcuts, strong soil preparation, short cycles)", "1.1.1_1.2.1_10.1.1.1"], ["Is it regular forestry with clearcuts possible?", "1.1.1_1.2.1_10.1.1.2"]]
-        },
-        "1.1.1_1.2.1_10.2": {
-            "name": "Is it multifunctional?",
-            "children": [["Yes", "1.1.1_1.2.1_10.2.1"], ["No", "1.1.1_1.2.1_10.2.2"], ["Not sure", "1.1.1_1.2.1_10.2.3"]]
+            "name": "Is it for ",
+            "children": [["arable crops? (e.g. cereal, rice, root crops, leguminous, oil crops, vegetables, cotton, hop, asparagus, strawberries, flowers)", "1.1.1_1.2.1_10.1.1"], ["permanent crops? (e.g. vineyards, fruit/berries/nuts, olive trees, nursery/Christmas trees, coffee/tea/cacao, banana, willow)", "1.1.1_1.2.1_10.1.2"]],
+            "leadsTo": "1.1.1_1.2.1_11"
         },
         "1.1.1_1.2.1_11": {
-            "name": "Is the land managed as cropland? ",
-            "children": [["Yes", "1.1.1_1.2.1_11.1"], ["No", "1.1.1_1.2.1_11.2"], ["Not sure", "1.1.1_1.2.1_11.3"]]
-        },
-        "1.1.1_1.2.1_11.1": {
-            "name": "Is it for ",
-            "children": [["arable crops? (e.g. cereal, rice, root crops, leguminous, oil crops, vegetables, cotton, hop, asparagus, strawberries, flowers)", "1.1.1_1.2.1_11.1.1"], ["permanent crops? (e.g. vineyards, fruit/berries/nuts, olive trees, nursery/Christmas trees, coffee/tea/cacao, banana, willow)", "1.1.1_1.2.1_11.1.2"]]
+            "name": "Is it pasture/meadow?",
+            "children": [["Yes", "1.1.1_1.2.1_12.1"], ["No", "1.1.1_1.2.1_12.2"], ["Not sure", "1.1.1_1.2.1_12.3"], ["Other", "1.1.1_1.2.1_12.4"]],
+            "leadsTo": "1.1.1_1.2.1_12"
         },
         "1.1.1_1.2.1_12": {
-            "name": "Is it pasture/meadow?",
-            "children": [["Yes", "1.1.1_1.2.1_12.1"], ["No", "1.1.1_1.2.1_12.2"], ["Not sure", "1.1.1_1.2.1_12.3"], ["Other", "1.1.1_1.2.1_12.4"]]
-        },
-        "1.1.1_1.2.1_13": {
             "name": "What is the approx. field size?",
-            "children": "integer"
+            "children": "integer",
+            "leadsTo": ["", "end"]
         },
         "1.2.1.1": {
             "name": "Water regime:",
-            "children": [["Is it waterlogged?", "1.2.1.1.1"], ["Is it wet periodically/seasonally?", "1.2.1.1.2"], ["Is it episodic i.e. dry for several months?", "1.2.1.1.3"]]
+            "children": [["Is it waterlogged?", "1.2.1.1.1"], ["Is it wet periodically/seasonally?", "1.2.1.1.2"], ["Is it episodic i.e. dry for several months?", "1.2.1.1.3"]],
+            "leadsTo": "1.2.1.2"
         },
         "1.2.1.2": {
             "name": "Wetness:",
-            "children": [["Is there surface water?", "1.2.1.2.1"], ["Is there saturated ground?", "1.2.1.2.2"]]
+            "children": [["Is there surface water?", "1.2.1.2.1"], ["Is there saturated ground?", "1.2.1.2.2"]],
+            "leadsTo": "1.2.1.2"
         },
         "1.2.1.3": {
             "name": "Salinity",
-            "children": [["Is the water saline?", "1.2.1.3.1"], ["Is the water brackish?", "1.2.1.3.2"], ["Is the water fresh?", "1.2.1.3.3"]]
+            "children": [["Is the water saline?", "1.2.1.3.1"], ["Is the water brackish?", "1.2.1.3.2"], ["Is the water fresh?", "1.2.1.3.3"]],
+            "leadsTo": "1.2.1.4"
         },
         "1.2.1.4": {
             "name": "Is there a tidal influence?",
-            "children": [["Yes", "1.2.1.4.1"], ["No", "1.2.1.3.2"], ["Not Sure", "1.2.1.4.1"]]
+            "children": [["Yes", "1.2.1.4.1"], ["No", "1.2.1.3.2"], ["Not Sure", "1.2.1.4.1"]],
+            "leadsTo": "end"
         },
         "2.0.0": {
             "name": "Is it ",
@@ -235,6 +274,10 @@ define([], function(){
     
     var mapping = {
         "root": ["Base Class I"]
+    };
+
+    return {
+        "questions": questions
     };
 
 });
