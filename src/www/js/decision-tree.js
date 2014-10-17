@@ -33,7 +33,7 @@ DAMAGE.
 
 /* jshint multistr: true */
 
-define(['./data2'], function(tree){
+define(['records', 'plugins/sync/js/pcapi'], function(records, pcapi){
     //the first page
     var page = "root";
     //the object of the current question
@@ -43,217 +43,260 @@ define(['./data2'], function(tree){
     //the number of times that previous button is pressed, need restriction
     var previous = 0;
 
-    var createQuestion = function(q, choice){
-        if(q){
-            $('#dtree-form').html(createQuestionOptions(q, choice).join("")).parent().trigger('create');
-        }
-    };
+    pcapi.getItem('dtree/eo.json', function(success, tree){
+        console.log(tree);
 
-    var createQuestionOptions = function(obj, choice){
-        var fieldset;
-        if(obj.children instanceof Array) {
-            fieldset = ['<fieldset data-role="controlgroup">'];
-            fieldset.push('<legend>' + obj.name + '</legend>');
-            $.each(obj.children, function(i,v){
-                var id;
-                if(v[1] !== null){
-                    fieldset.push('<label for="'+v[1]+'">' + v[0] + '</label>');
-                    id = v[1];
-                    if(choice && choice === v[0]){
-                        fieldset.push('<input name="radio-' + page + '" id="' + id + '" value="' + v[0] + '" type="radio" required="" checked="checked">');
-                    }
-                    else{
-                        fieldset.push('<input name="radio-' + page + '" id="' + id + '" value="' + v[0] + '" type="radio" required="">');
-                    }
-                }
-                else{
-                    fieldset.push('<label for="'+v[0]+'">' + v[0] + '</label>');
-                    id = v[0];
-                    if(choice && choice === v[0]){
-                        fieldset.push('<input name="radio-' + page + '" id="' + id + '" value="' + v[0] + '" type="radio" required="" checked="checked">');
-                    }
-                    else{
-                        fieldset.push('<input name="radio-' + page + '" id="' + id + '" value="' + v[0] + '" type="radio" required="">');
-                    }
-                }
-            });
-            fieldset.push('</div>');
-        }
-        else if(obj.children === 'integer'){
-            fieldset = ['<label for="'+ page +'">'+obj.name+'</label>'];
-            fieldset.push('<input type="number" id="'+page+'" value="0">');
-        }
-        return fieldset;
-    };
-
-    /**
-     * Checks that i) something is selected ii) answer is implemented
-     *  and shows relevant message.
-     * Returns true/false to indicate correct/incorrect result
-     */
-    var checkAnswer = function(){
-        var selected = getSelection();
-        var answer = tree.questions[page].children;
-        if (! selected ){ //no selection made
-            popup("Please choose a class");
-            return false;
-        }
-        return true;
-    };
-
-    var checkAnswerInAnswers = function(back){
-        var value;
-        var changed = false;
-        for(var i=answers.length-1; i>=0;i--){
-            if(answers[i].id === page){
-                if(back){
-                    page = answers[i-1].id;
-                    value = answers[i-1].answer.value;
-                }
-                else{
-                    page = answers[i].id;
-                    value = answers[i].answer.value;
-                }
-                changed = true;
-                break;
+        var createQuestion = function(q, choice){
+            if(q){
+                $('#dtree-form').html(createQuestionOptions(q, choice).join("")).parent().trigger('create');
             }
-        }
-        if(!changed && answers.length > 0 && back){
-            page = answers[answers.length-1].id;
-            value = answers[answers.length-1].answer.value;
-        }
-        return value;
-    };
-
-    var findNextQuestion = function(answer){
-        if("leadsTo" in questionObj){
-            var leadsTo = questionObj.leadsTo;
-            if(leadsTo instanceof Array){
-                page = questionObj.leadsTo;
-                for(var i=0; i<answers.length; i++){
-                    for(var j=0; j<page.length; j++){
-                        if(page[j].indexOf("-") && answers[i].answer.id.split("-")[0] === page[j]){
-                            page = answers[i].answer.id.split("-")[0];
+        };
+    
+        var createQuestionOptions = function(obj, choice){
+            var fieldset;
+            if(obj.children instanceof Array) {
+                fieldset = ['<fieldset data-role="controlgroup">'];
+                fieldset.push('<legend>' + obj.name + '</legend>');
+                $.each(obj.children, function(i,v){
+                    var id;
+                    if(v[1] !== null){
+                        fieldset.push('<label for="'+v[1]+'">' + v[0] + '</label>');
+                        id = v[1];
+                        if(choice && choice === v[0]){
+                            fieldset.push('<input name="radio-' + page + '" id="' + id + '" value="' + v[0] + '" type="radio" required="" checked="checked">');
                         }
-                        else if(answers[i].answer.id === page[j]){
-                            page = answers[i].answer.id;
+                        else{
+                            fieldset.push('<input name="radio-' + page + '" id="' + id + '" value="' + v[0] + '" type="radio" required="">');
                         }
                     }
-                }
+                    else{
+                        fieldset.push('<label for="'+v[0]+'">' + v[0] + '</label>');
+                        id = v[0];
+                        if(choice && choice === v[0]){
+                            fieldset.push('<input name="radio-' + page + '" id="' + id + '" value="' + v[0] + '" type="radio" required="" checked="checked">');
+                        }
+                        else{
+                            fieldset.push('<input name="radio-' + page + '" id="' + id + '" value="' + v[0] + '" type="radio" required="">');
+                        }
+                    }
+                });
+                fieldset.push('</div>');
             }
-            else{
-                page = questionObj.leadsTo;
+            else if(obj.children === 'integer'){
+                fieldset = ['<label for="'+ page +'">'+obj.name+'</label>'];
+                fieldset.push('<input type="number" id="'+page+'" value="0">');
             }
-        }
-        else{
-            page = answer.id;
-        }
-    };
-
-    /** Returns selected value or null if none selected */
-    var getSelection = function(){
-        var selected;
-        if(tree.questions[page].children instanceof Array){
-            selected = {
-                "value": $('input[name="radio-' + page + '"]:checked', '#dtree-form').val(),
-                "id": $('input[name="radio-' + page + '"]:checked', '#dtree-form').prop('id')
-            };
-        }
-        else{
-            selected = {
-                "value": $('input').val(),
-                "id": page
-            };
-        }
-        if(selected.value === undefined){
-            return null;
-        }
-        else{
-            return selected;
-        }
-    };
-
-    /**
-     * function for getting the question from data
-     * @param key: the id of the question
-     * @returns: the question object
-     */
-    var getQuestion = function(key){
-        for(var q in tree.questions){
-            if(q === key){
-                return tree.questions[q];
+            return fieldset;
+        };
+    
+        /**
+         * Checks that i) something is selected ii) answer is implemented
+         *  and shows relevant message.
+         * Returns true/false to indicate correct/incorrect result
+         */
+        var checkAnswer = function(){
+            var selected = getSelection();
+            var answer = tree.questions[page].children;
+            if (! selected ){ //no selection made
+                popup("Please choose a class");
+                return false;
             }
-        }
-        return;
-    };
-
-    /**
-     * function for initializing the questionnaire
-     */
-    var initQuestionnaire = function(){
-        var q = getQuestion('root');
-        if(q){
-            setQuestion(q);
-            createQuestion(q);
-        }
-    };
-
-     /* popup a msg */
-    var popup = function(msg){
-        $('#popup-text').text(msg).parent().popup('open');
-    };
-
-    var setQuestion = function(q){
-        questionObj = q;
-    };
-
-    /*********EVENTS************/
-    $(document).on(
-        'vclick',
-        '#dtree-prev',
-        function(event){
-            previous++;
-            var value = checkAnswerInAnswers(true);
-            createQuestion(tree.questions[page], value);
-            setQuestion(tree.questions[page]);
-        }
-    );
-    $(document).on(
-        'vclick',
-        '#dtree-next',
-        function(){
-            //check if answer is selected
-            if(!checkAnswer()){
-                $("#dtree-popup").popup('open');
-                return;
-            }
-            var answer = getSelection();
-            
-            var check =false;
-            for(var i=0; i<answers.length;i++){
+            return true;
+        };
+    
+        var checkAnswerInAnswers = function(back){
+            var value;
+            var changed = false;
+            for(var i=answers.length-1; i>=0;i--){
                 if(answers[i].id === page){
-                    if(answer.value !== answers[i].answer.value){
-                        answers[i].answer = answer;
+                    if(back){
+                        page = answers[i-1].id;
+                        value = answers[i-1].answer.value;
                     }
-                    check = true;
+                    else{
+                        page = answers[i].id;
+                        value = answers[i].answer.value;
+                    }
+                    changed = true;
                     break;
                 }
             }
-            if(check === false){
-                //store the answer in an array
-                answers.push({"id": page, "answer": answer});
+            if(!changed && answers.length > 0 && back){
+                page = answers[answers.length-1].id;
+                value = answers[answers.length-1].answer.value;
             }
-            findNextQuestion(answer);
-            //get answer for the question if already exists
-            var value = checkAnswerInAnswers();
-
-            createQuestion(tree.questions[page], value);
-            setQuestion(tree.questions[page]);
-        }
-    );
-
-    // listen on any page with class sync-page
-    $(document).on('_pageshow', '#decision-tree-page', initQuestionnaire);
+            return value;
+        };
+    
+        var findNextQuestion = function(answer){
+            if("leadsTo" in questionObj){
+                var leadsTo = questionObj.leadsTo;
+                var oldPage = page;
+                if(leadsTo instanceof Array){
+                    //check if there's end in the leadsTo array
+                    if(leadsTo.indexOf("end") > -1){
+                        for (var k=0; k<leadsTo.length-1; k++){
+                            //if there is _ it means we have potential answers to check for
+                            if(leadsTo[k].indexOf("_") > -1){
+                                //find the potential next pages (answers from before)
+                                var pages = leadsTo[k].split("_");
+                                for(var i=0; i<answers.length; i++){
+                                    for(var j=0; j<pages.length; j++){
+                                        //if one of the potential next questions exists as answer
+                                        if(pages[j]  === answers[i].answer.id){
+                                            page = leadsTo[k];
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        //if page from above not found then end it
+                        if(oldPage === page){
+                            page = leadsTo[leadsTo.length-1];
+                        }
+                    }
+                    else{
+                        //check if any of the previous answers is in one of the potential destinations
+                        for(var l=0; l<answers.length; l++){
+                            for(var m=0; m<leadsTo.length; m++){
+                                //if there's - that means that there are answers that lead to the same page
+                                if(leadsTo[m].indexOf("-") && answers[l].answer.id.split("-")[0] === leadsTo[m]){
+                                    page = answers[l].answer.id.split("-")[0];
+                                }
+                                //if there's an answer with the potentail next page then that's the page
+                                else if(answers[l].answer.id === leadsTo[m]){
+                                    page = answers[l].answer.id;
+                                }
+                            }
+                        }
+                        if(oldPage === page){
+                            page = leadsTo[leadsTo.length-1];
+                        }
+                    }
+                }
+                else{
+                    page = questionObj.leadsTo;
+                }
+            }
+            else{
+                page = answer.id;
+            }
+        };
+    
+        /** Returns selected value or null if none selected */
+        var getSelection = function(){
+            var selected;
+            if(tree.questions[page].children instanceof Array){
+                selected = {
+                    "value": $('input[name="radio-' + page + '"]:checked', '#dtree-form').val(),
+                    "id": $('input[name="radio-' + page + '"]:checked', '#dtree-form').prop('id')
+                };
+            }
+            else{
+                selected = {
+                    "value": $('input').val(),
+                    "id": page
+                };
+            }
+            if(selected.value === undefined){
+                return null;
+            }
+            else{
+                return selected;
+            }
+        };
+    
+        /**
+         * function for getting the question from data
+         * @param key: the id of the question
+         * @returns: the question object
+         */
+        var getQuestion = function(key){
+            for(var q in tree.questions){
+                if(q === key){
+                    return tree.questions[q];
+                }
+            }
+            return;
+        };
+    
+        /**
+         * function for initializing the questionnaire
+         */
+        var initQuestionnaire = function(){
+            var q = getQuestion('root');
+            if(q){
+                setQuestion(q);
+                createQuestion(q);
+            }
+        };
+    
+         /* popup a msg */
+        var popup = function(msg){
+            $('#popup-text').text(msg).parent().popup('open');
+        };
+    
+        var setQuestion = function(q){
+            questionObj = q;
+        };
+    
+        /*********EVENTS************/
+        $(document).on(
+            'vclick',
+            '#dtree-prev',
+            function(event){
+                previous++;
+                var value = checkAnswerInAnswers(true);
+                createQuestion(tree.questions[page], value);
+                setQuestion(tree.questions[page]);
+            }
+        );
+        $(document).on(
+            'vclick',
+            '#dtree-next',
+            function(){
+                //check if answer is selected
+                if(!checkAnswer()){
+                    $("#dtree-popup").popup('open');
+                    return;
+                }
+                var answer = getSelection();
+                
+                var check =false;
+                for(var i=0; i<answers.length;i++){
+                    if(answers[i].id === page){
+                        if(answer.value !== answers[i].answer.value){
+                            answers[i].answer = answer;
+                        }
+                        check = true;
+                        break;
+                    }
+                }
+                if(check === false){
+                    //store the answer in an array
+                    answers.push({"id": page, "answer": answer});
+                }
+                findNextQuestion(answer);
+                //get answer for the question if already exists
+                var value = checkAnswerInAnswers();
+    
+                //if the page is not the end render the question
+                if(page !== "end"){
+                    createQuestion(tree.questions[page], value);
+                    setQuestion(tree.questions[page]);
+                }
+                //if page==end then fire up final form
+                else{
+                    //popup("This was the end");
+                    records.annotateImage();
+                }
+            }
+        );
+    
+        // listen on any page with class sync-page
+        $(document).on('_pageshow', '#decision-tree-page', initQuestionnaire);
+    });
 
     $('head').prepend('<link rel="stylesheet" href="plugins/sync/css/style.css" type="text/css" />');
 });
