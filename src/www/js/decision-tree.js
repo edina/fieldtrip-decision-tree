@@ -45,6 +45,13 @@ define(['records', 'utils', 'plugins/sync/js/pcapi'], function(records, utils, p
     //the tree questions
     var questions;
 
+    var addRecordTreeAnswers = function(e, annotation){
+        //var obj = {};
+        //obj["dtree"] = answers;
+        //annotation.record.properties.fields.push(obj);
+        annotation.record.properties.dtree = answers;
+    };
+
     /**
      * function for appending the question to the html
      * @param q is the question object
@@ -330,13 +337,15 @@ define(['records', 'utils', 'plugins/sync/js/pcapi'], function(records, utils, p
             //if page==end then fire up final form
             else{
                 //popup("This was the end");
-                records.annotateImage();
+                //records.annotateImage();
+                records.annotate(records.EDITOR_GROUP.PRIVATE, 'eo');
             }
         }
     );
 
     // listen on any page with class sync-page
     $(document).on('_pageshow', '#decision-tree-page', initEO);
+    $(document).on(records.EVT_EDIT_ANNOTATION, addRecordTreeAnswers);
 
     $('head').prepend('<link rel="stylesheet" href="plugins/sync/css/style.css" type="text/css" />');
 });
