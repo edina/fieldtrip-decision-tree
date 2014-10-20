@@ -1,7 +1,7 @@
-var questions = {
+{
     "root": {
         "name": "Is it ",
-        "children": [['Primarly vegetated', '1.0.0'], ['Primarly non-vegetated', '2.0.0']],
+        "children": [["Primarly vegetated", "1.0.0"], ["Primarly non-vegetated", "2.0.0"]],
         "leadsTo": ["2.0.0", "Base Class I"]
     },
     "Base Class I": {
@@ -234,4 +234,4 @@ var questions = {
         "children": [["watersource?", "2.2.2.1"], ["waterbody?", "2.2.2.2"], ["estuary?", "2.2.2.3"], ["lagoon?", "2.2.2.3"], ["open sea?", "2.2.2.4"], ["permanent snow?", "2.2.2.5"], ["ice/glacier?", "2.2.2.6"]],
         "leadsTo": "end"
     }
-};
+}
