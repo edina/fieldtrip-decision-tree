@@ -336,8 +336,6 @@ define(['records', 'utils', 'plugins/sync/js/pcapi'], function(records, utils, p
             }
             //if page==end then fire up final form
             else{
-                //popup("This was the end");
-                //records.annotateImage();
                 records.annotate(records.EDITOR_GROUP.PRIVATE, 'eo');
             }
         }
