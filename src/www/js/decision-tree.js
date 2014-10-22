@@ -33,7 +33,7 @@ DAMAGE.
 
 /* jshint multistr: true */
 
-define(['records', 'utils', 'plugins/sync/js/pcapi'], function(records, utils, pcapi){
+define(['records', 'utils', 'file'], function(records, utils, file){
     //the first page
     var page = "root";
     //the object of the current question
@@ -43,7 +43,7 @@ define(['records', 'utils', 'plugins/sync/js/pcapi'], function(records, utils, p
     //the number of times that previous button is pressed, need restriction
     var previous = 0;
     //the tree questions
-    var questions;
+    var questions, dgroup, dtype;
 
     var addRecordTreeAnswers = function(e, annotation){
         //var obj = {};
@@ -268,23 +268,35 @@ define(['records', 'utils', 'plugins/sync/js/pcapi'], function(records, utils, p
     };
 
     /**
-     * function for initializing EO
+     * function for initializing DecisionTree
      * download data and start questionnaire
      */
-    var initEO = function(){
-        var options = {
-            "remoteDir": "dtree",
-            "item": "eo.json"
-        };
-        $.mobile.loading('show');
-        pcapi.getFSItem(options, function(success, data){
-            $.mobile.loading('hide');
-            if(data){
-                questions = data;
-                initQuestionnaire();
-            }
-            else{
-                utils.informError("No EO data ");
+    var initDtree = function(group, type){
+        group = group || records.EDITOR_GROUP.DEFAULT;
+
+        var url;
+
+        if(group ===  records.EDITOR_GROUP.DEFAULT){
+            url = 'editors/' + type + '.json';
+        }else{
+            url = file.getFilePath(records.getEditorsDir(group)) + '/' + type + '.json';
+        }
+        dgroup = group;
+        dtype = type;
+
+        $.ajax({
+            url: url,
+            dataType: "json",
+            success: function(data){
+                $.mobile.loading('hide');
+                console.log(data);
+                if(data){
+                    questions = data;
+                    $('body').pagecontainer('change', 'decision-tree.html', {transition: "fade"});
+                }
+                else{
+                    utils.informError("No data ");
+                }
             }
         });
     };
@@ -336,13 +348,22 @@ define(['records', 'utils', 'plugins/sync/js/pcapi'], function(records, utils, p
             }
             //if page==end then fire up final form
             else{
-                records.annotate(records.EDITOR_GROUP.PRIVATE, 'eo');
+                records.annotate(dgroup, dtype);
             }
         }
     );
 
+    $('.annotate-custom-dtree-form').unbind();
+    $('body').on('click', '.annotate-custom-dtree-form', function(event){
+        var $editor = $(event.currentTarget);
+
+        var group = $editor.attr('editor-group');
+        var type = $editor.attr('editor-type');
+        initDtree(group, type);
+    });
+
     // listen on any page with class sync-page
-    $(document).on('_pageshow', '#decision-tree-page', initEO);
+    $(document).on('_pageshow', '#decision-tree-page', initQuestionnaire);
     $(document).on(records.EVT_EDIT_ANNOTATION, addRecordTreeAnswers);
 
     $('head').prepend('<link rel="stylesheet" href="plugins/sync/css/style.css" type="text/css" />');
