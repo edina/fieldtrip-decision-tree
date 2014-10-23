@@ -273,6 +273,7 @@ define(['records', 'utils', 'file'], function(records, utils, file){
      */
     var initDtree = function(group, type){
         group = group || records.EDITOR_GROUP.DEFAULT;
+        answers=[];
 
         var url;
 
@@ -357,8 +358,8 @@ define(['records', 'utils', 'file'], function(records, utils, file){
     $('body').on('click', '.annotate-custom-dtree-form', function(event){
         var $editor = $(event.currentTarget);
 
-        var group = $editor.attr('editor-group');
-        var type = $editor.attr('editor-type');
+        var group = $editor.attr('data-editor-group');
+        var type = $editor.attr('data-editor-type');
         initDtree(group, type);
     });
 
