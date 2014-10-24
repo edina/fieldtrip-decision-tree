@@ -30,7 +30,7 @@
     },
     "PV.2.1": {
         "name": "Is it ",
-        "children": [["Regular bushes", "PV2.1"], ["Dward Shrubs", "PV2.2"]],
+        "children": [["Regular bushes", "PV2.1"], ["Dwarf Shrubs", "PV2.2"]],
         "leadsTo": "PV.1"
     },
     "PV.3.1": {
@@ -161,7 +161,7 @@
     "1.2.1_2": {
         "name": "Wetness:",
         "children": [["Is there surface water?", "1.2.1_2.1"], ["Is there saturated ground?", "1.2.1_2.2"]],
-        "leadsTo": "1.2.1_2"
+        "leadsTo": "1.2.1_3"
     },
     "1.2.1_3": {
         "name": "Salinity",
