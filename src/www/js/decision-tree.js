@@ -274,6 +274,7 @@ define(['records', 'utils', 'file'], function(records, utils, file){
     var initDtree = function(group, type){
         group = group || records.EDITOR_GROUP.DEFAULT;
         answers=[];
+        page = "root";
 
         var url;
 
