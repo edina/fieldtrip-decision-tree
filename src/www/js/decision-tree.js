@@ -279,9 +279,9 @@ define(['records', 'utils', 'file'], function(records, utils, file){
         var url;
 
         if(group ===  records.EDITOR_GROUP.DEFAULT){
-            url = 'editors/' + type + '.json';
+            url = 'editors/' + type.replace(/.edtr$/, '.json');
         }else{
-            url = file.getFilePath(records.getEditorsDir(group)) + '/' + type + '.json';
+            url = file.getFilePath(records.getEditorsDir(group)) + '/' + type.replace(/.edtr$/, '.json');
         }
         dgroup = group;
         dtype = type;
@@ -324,7 +324,7 @@ define(['records', 'utils', 'file'], function(records, utils, file){
                 return;
             }
             var answer = getSelection();
-            
+
             var check =false;
             for(var i=0; i<answers.length;i++){
                 if(answers[i].id === page){
