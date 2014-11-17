@@ -304,20 +304,23 @@ define(['records', 'utils', 'file'], function(records, utils, file){
     };
 
     /**
-     * Process the content of the editor
-     *
+     * Implements the records.processEditor interface
      * @param editorName name of the editor
      * @param html html content of the editor
-     * @param group the records.EDITOR_GROUP
+     * @param group from records.EDITOR_GROUP
+     * @param online boolean value if the processing is held online
      */
-    var processEditor = function(editorName, html, group){
+    var processEditor = function(editorName, html, group, online){
         var $form = $(html);
         var editorsObj = records.loadEditorsMetadata();
 
         // Add the dom class that will be used in the buttons
-        var editorClass = $('#dtree-class-name', $form).text();
+        var editorClass = $('#dtree-form-class-name', $form).text();
         if(editorClass !== ""){
-            editorsObj[group][editorName] = editorsObj[group][editorName] || {};
+            if(editorsObj[group][editorName] === undefined){
+                editorsObj[group][editorName] = {};
+            }
+
             editorsObj[group][editorName]['class'] = editorClass;
 
             // Save the result
@@ -380,8 +383,8 @@ define(['records', 'utils', 'file'], function(records, utils, file){
         }
     );
 
-    $('.annotate-custom-dtree-form').unbind();
-    $('body').on('click', '.annotate-custom-dtree-form', function(event){
+    $('.annotate-dtree-form').unbind();
+    $('body').on('click', '.annotate-dtree-form', function(event){
         var $editor = $(event.currentTarget);
 
         var group = $editor.attr('data-editor-group');
