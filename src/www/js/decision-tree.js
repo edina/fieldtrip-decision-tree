@@ -303,6 +303,31 @@ define(['records', 'utils', 'file'], function(records, utils, file){
         });
     };
 
+    /**
+     * Process the content of the editor
+     *
+     * @param editorName name of the editor
+     * @param html html content of the editor
+     * @param group the records.EDITOR_GROUP
+     */
+    var processEditor = function(editorName, html, group){
+        var $form = $(html);
+        var editorsObj = records.loadEditorsMetadata();
+
+        // Add the dom class that will be used in the buttons
+        var editorClass = $('#dtree-class-name', $form).text();
+        if(editorClass !== ""){
+            editorsObj[group][editorName] = editorsObj[group][editorName] || {};
+            editorsObj[group][editorName]['class'] = editorClass;
+
+            // Save the result
+            records.saveEditorsMetadata(editorsObj);
+        }
+    };
+
+    // Add the plugin editor process to the pipeline
+    records.addProcessEditor(processEditor);
+
     /*********EVENTS************/
     $(document).on(
         'vclick',
