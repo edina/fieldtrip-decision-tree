@@ -45,11 +45,28 @@ define(['records', 'utils', 'file'], function(records, utils, file){
     //the tree questions
     var questions, dgroup, dtype;
 
-    var addRecordTreeAnswers = function(e, annotation){
-        //var obj = {};
-        //obj["dtree"] = answers;
-        //annotation.record.properties.fields.push(obj);
-        annotation.record.properties.dtree = answers;
+    var dtreeToStr = function(tree) {
+        var answers;
+
+        answers = tree.map(function(item) {
+            if (item.answer) {
+                return item.answer.value;
+            }
+        });
+
+        return answers.join(', ');
+    };
+
+    var addRecordTreeAnswers = function(e, annotation) {
+        var field = {
+            id: 'fieldcontain-dtree-1',
+            label: 'Decision tree'
+        };
+
+        field.dtree = answers;
+        field.val = dtreeToStr(answers);
+
+        annotation.record.properties.fields.push(field);
     };
 
     /**
