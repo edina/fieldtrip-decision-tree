@@ -45,6 +45,10 @@ define(['records', 'utils', 'file'], function(records, utils, file){
     //the tree questions
     var questions, dgroup, dtype;
 
+    var pluginRoot = 'plugins/decision-tree/';
+
+    var dtreeId = 'fieldcontain-dtree-1';
+
     var dtreeToStr = function(tree) {
         var answers;
 
@@ -59,7 +63,7 @@ define(['records', 'utils', 'file'], function(records, utils, file){
 
     var addRecordTreeAnswers = function(e, annotation) {
         var field = {
-            id: 'fieldcontain-dtree-1',
+            id: dtreeId,
             label: 'Decision tree'
         };
 
@@ -288,7 +292,10 @@ define(['records', 'utils', 'file'], function(records, utils, file){
      * function for initializing DecisionTree
      * download data and start questionnaire
      */
-    var initDtree = function(group, type){
+    var initDtree = function(){
+        var group = localStorage.getItem('annotate-form-group');
+        var type = localStorage.getItem('annotate-form-type');
+
         group = group || records.EDITOR_GROUP.DEFAULT;
         answers=[];
         page = "root";
@@ -348,6 +355,19 @@ define(['records', 'utils', 'file'], function(records, utils, file){
     // Add the plugin editor process to the pipeline
     records.addProcessEditor(processEditor);
 
+    var createButton = function() {
+        $.each($('.button-dtree'), function(index, input) {
+            var btn = '<div id="annotate-dtree-' + index + '">' +
+                          '<a class="annotate-dtree" href="#">' +
+                              '<img src="' + pluginRoot + 'css/images/eo.png">' +
+                          '</a>' +
+                      '</div>';
+            $(input).append(btn);
+        });
+    };
+
+    records.addDisplayEditorFunction(createButton);
+
     /*********EVENTS************/
     $(document).on(
         'vclick',
@@ -400,13 +420,21 @@ define(['records', 'utils', 'file'], function(records, utils, file){
         }
     );
 
-    $('.annotate-dtree-form').unbind();
-    $('body').on('click', '.annotate-dtree-form', function(event){
-        var $editor = $(event.currentTarget);
+    // Dtree from a button inside an editor
+    $('.annotate-dtree').unbind();
+    $('body').on('click', '.annotate-dtree', function(event) {
+        var fieldcontain = $(event.target).closest('.fieldcontain').get(0);
 
-        var group = $editor.attr('data-editor-group');
-        var type = $editor.attr('data-editor-type');
-        initDtree(group, type);
+        if (fieldcontain && fieldcontain.id) {
+            dtreeId = fieldcontain.id;
+        }
+        initDtree();
+    });
+
+    // Dtree from the the capture page
+    $('.annotate-dtree-form').unbind();
+    $('body').on('click', '.annotate-dtree-form', function(event) {
+        initDtree();
     });
 
     // listen on any page with class sync-page
