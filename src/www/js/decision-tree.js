@@ -169,7 +169,8 @@ define(['records', 'utils', 'file', './ext/eo-graph'], function(records, utils, 
 
     /* popup a msg */
     var popup = function(msg) {
-        $('#popup-text').text(msg).parent().popup('open');
+        $('#popup-text').html(msg);
+        $('#dtree-popup').popup('open');
     };
 
     /**
@@ -282,7 +283,7 @@ define(['records', 'utils', 'file', './ext/eo-graph'], function(records, utils, 
                 }
             }
             else {
-                $('#dtree-popup').popup('Please answer all the questions');
+                popup('Please answer all the questions');
             }
             return false;
         }
