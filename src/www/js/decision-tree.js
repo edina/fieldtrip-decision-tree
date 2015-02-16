@@ -45,7 +45,8 @@ define(['records', 'utils', 'file', './ext/eo-graph'], function(records, utils, 
         '<fieldset data-role="controlgroup">' +
             '<legend><%- question %></legend>' +
             '<%= fields %>' +
-        '</fieldset>'
+        '</fieldset>' +
+        '<%= buttons %>'
     );
 
     var radioWidget = _.template(
@@ -63,6 +64,15 @@ define(['records', 'utils', 'file', './ext/eo-graph'], function(records, utils, 
     var rangeWidget = _.template(
         '<label for="slider-<%- id %>">Input slider:</label>' +
         '<input type="range" name="<%= name %>" id="slider-<%- id %>" value="<%- value %>" min="<%- min %>" max="<%- max %>">'
+    );
+
+    var controlButtons = _.template(
+        '<% if (previous === true) { %>' +
+        '<a href="#" id="dtree-prev" data-role="button" data-mini="true" data-inline="true"><< Prev</a>' +
+        '<% } %>' +
+        '<% if (next === true) { %>' +
+        '<a href="#" id="dtree-next" data-role="button" data-mini="true" data-inline="true">Next >></a>' +
+        '<% } %>'
     );
 
     var formatEdge = function(edge) {
@@ -131,9 +141,16 @@ define(['records', 'utils', 'file', './ext/eo-graph'], function(records, utils, 
     };
 
     var renderFieldSetToString = function(node) {
+        var buttons = {
+            previous: eoGraph.hasPrevious(),
+            next: eoGraph.hasNext()
+        };
+
         return fieldsetWidget({
             question: node.label,
-            fields: renderFieldsToString(node.name, node.edges)
+            fields: renderFieldsToString(node.name, node.edges),
+            buttons: controlButtons(buttons)
+
         });
     };
 
@@ -301,5 +318,5 @@ define(['records', 'utils', 'file', './ext/eo-graph'], function(records, utils, 
     $(document).on('_pageshow', '#decision-tree-page', renderPage);
     $(document).on(records.EVT_EDIT_ANNOTATION, addRecordTreeAnswers);
 
-    $('head').prepend('<link rel="stylesheet" href="plugins/sync/css/style.css" type="text/css" />');
+    $('head').prepend('<link rel="stylesheet" href="plugins/decision-tree/css/style.css" type="text/css" />');
 });

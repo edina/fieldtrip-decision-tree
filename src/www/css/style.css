@@ -1,0 +1,11 @@
+#dtree-next, #dtree-prev {
+    width: 39%;
+}
+
+#dtree-next {
+    float: right;
+}
+
+#dtree-prev {
+    float: left;
+}
