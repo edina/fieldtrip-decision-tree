@@ -238,14 +238,22 @@ define(['records', 'utils', 'file', './ext/eo-graph'], function(records, utils, 
         'vclick',
         '#dtree-prev',
         function(event) {
-            eoGraph.prev();
+            event.stopPropagation();
+            event.preventDefault();
+
+            eoGraph.previous();
             renderPage();
+
+            return false;
         }
     );
     $(document).on(
         'vclick',
         '#dtree-next',
-        function() {
+        function(event) {
+            event.stopPropagation();
+            event.preventDefault();
+
             var answers = $('form').serializeArray();
             if (answers.length === 1) {
                 eoGraph.next(answers[0].value);
@@ -259,6 +267,7 @@ define(['records', 'utils', 'file', './ext/eo-graph'], function(records, utils, 
             else {
                 $('#dtree-popup').popup('Please answer all the questions');
             }
+            return false;
         }
     );
 
