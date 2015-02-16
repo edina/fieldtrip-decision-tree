@@ -6,6 +6,9 @@
     "Panos Terzis <P.Terzis@ed.ac.uk>"
   ],
   "main": "src/www/js/dtree.js",
+  "dependencies": {
+    "eo-graph": "edina/eo-graph"
+  },
   "keywords": [
     "fieldtrip-open",
     "decision",
