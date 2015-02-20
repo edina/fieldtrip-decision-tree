@@ -93,10 +93,12 @@ define(['records', 'utils', 'file', './ext/eo-graph'], function(records, utils, 
             label: 'Decision tree'
         };
 
-        field.dtree = eoGraph.edges().map(formatEdge);
-        field.val = eoGraph.values().join(', ');
+        if (eoGraph !== undefined) {
+            field.dtree = eoGraph.edges().map(formatEdge);
+            field.val = eoGraph.values().join(', ');
 
-        annotation.record.properties.fields.push(field);
+            annotation.record.properties.fields.push(field);
+        }
     };
 
     var renderFieldsToString = function(name, edges) {
