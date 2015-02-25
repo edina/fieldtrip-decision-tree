@@ -42,7 +42,7 @@ define(['records', 'utils', 'file', './ext/eo-graph'], function(records, utils, 
     var dtreeId = 'fieldcontain-dtree-1';
 
     var fieldsetWidget = _.template(
-        '<fieldset data-role="controlgroup">' +
+        '<fieldset data-role="controlgroup" data-theme="b">' +
             '<legend><%- question %></legend>' +
             '<%= fields %>' +
         '</fieldset>' +
