@@ -33,9 +33,12 @@ DAMAGE.
 
 /* global _ */
 
-define(['records', 'utils', 'file', './ext/eo-graph'], function(records, utils, file, EOGraph) {
+define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(records, utils, file, widgets, EOGraph) { // jshint ignore:line
     var dgroup, dtype;
     var eoGraph;
+    var asAForm = false; // Flag to ignore the records.EVT_EDIT_ANNOTATION event
+
+    var onFinishDtree;
 
     var pluginRoot = 'plugins/decision-tree/';
 
@@ -72,6 +75,8 @@ define(['records', 'utils', 'file', './ext/eo-graph'], function(records, utils, 
         '<% } %>' +
         '<% if (next === true) { %>' +
         '<a href="#" id="dtree-next" data-role="button" data-mini="true" data-inline="true">Next >></a>' +
+        '<% } else { %>' +
+        '<a href="#" id="dtree-done" data-role="button" data-mini="true" data-inline="true">Done.</a>' +
         '<% } %>'
     );
 
@@ -85,17 +90,32 @@ define(['records', 'utils', 'file', './ext/eo-graph'], function(records, utils, 
         };
     };
 
+    var getReprAndValue = function(graph) {
+        var repr;
+        var value;
+
+        value = graph.edges().map(formatEdge);
+        repr = graph.values().join(', ');
+
+        return {
+            repr: repr,
+            value: value
+        };
+    };
+
     var addRecordTreeAnswers = function(e, annotation) {
         var field;
+        var graph;
 
         field = {
             id: dtreeId,
             label: 'Decision tree'
         };
 
-        if (eoGraph !== undefined) {
-            field.dtree = eoGraph.edges().map(formatEdge);
-            field.val = eoGraph.values().join(', ');
+        if (eoGraph !== undefined && asAForm) {
+            graph = getReprAndValue(eoGraph);
+            field.dtree = graph.value;
+            field.val = graph.repr;
 
             annotation.record.properties.fields.push(field);
         }
@@ -179,7 +199,7 @@ define(['records', 'utils', 'file', './ext/eo-graph'], function(records, utils, 
      * function for initializing DecisionTree
      * download data and start questionnaire
      */
-    var initDtree = function(group, type) {
+    var loadDtree = function(group, type, callback) {
         var url;
 
         if (group ===  records.EDITOR_GROUP.DEFAULT) {
@@ -202,8 +222,9 @@ define(['records', 'utils', 'file', './ext/eo-graph'], function(records, utils, 
                     if (!eoGraph.init(data)) {
                         utils.informError('Error loading the tree');
                     }
-
-                    $('body').pagecontainer('change', 'decision-tree.html', {transition: 'fade'});
+                    else {
+                        utils.doCallback(callback);
+                    }
                 }
                 else {
                     utils.informError('No data ');
@@ -247,11 +268,27 @@ define(['records', 'utils', 'file', './ext/eo-graph'], function(records, utils, 
                               '<img src="' + pluginRoot + 'css/images/eo.png">' +
                           '</a>' +
                       '</div>';
+
             $(input).append(btn);
         });
     };
 
+    var insertPopupPlaceHolder = function() {
+        var $form = $('form');
+        var html = '<div id="dtree-container" data-role="popup" data-dismissible="false">' +
+                       '<form id="dtree-form" data-ajax="false" accept-charset="utf-8"></form>' +
+                   '</div>';
+
+        $form.append(html);
+        $('#dtree-container').popup();
+    };
+
+    var registerOnFinish = function(func) {
+        onFinishDtree = func;
+    };
+
     records.addDisplayEditorFunction(createButton);
+    records.addDisplayEditorFunction(insertPopupPlaceHolder);
 
     /*********EVENTS************/
     $(document).on(
@@ -274,14 +311,14 @@ define(['records', 'utils', 'file', './ext/eo-graph'], function(records, utils, 
             event.stopPropagation();
             event.preventDefault();
 
-            var answers = $('form').serializeArray();
+            var answers = $('form#dtree-form').serializeArray();
             if (answers.length === 1) {
                 eoGraph.next(answers[0].value);
                 if (eoGraph.hasNext()) {
                     renderPage();
                 }
                 else {
-                    records.annotate(dgroup, dtype);
+                    utils.doCallback(onFinishDtree);
                 }
             }
             else {
@@ -291,9 +328,23 @@ define(['records', 'utils', 'file', './ext/eo-graph'], function(records, utils, 
         }
     );
 
+    $(document).off('vclick', '#dtree-done');
+    $(document).on(
+        'vclick',
+        '#dtree-done',
+        function(event) {
+            event.stopPropagation();
+            event.preventDefault();
+
+            utils.doCallback(onFinishDtree);
+
+            return false;
+        }
+    );
+
     // Dtree from a button inside an editor
     $('.annotate-dtree').unbind();
-    $('body').on('click', '.annotate-dtree', function(event) {
+    $('body').on('vclick', '.annotate-dtree', function(event) {
         var fieldcontain = $(event.target).closest('.fieldcontain').get(0);
         var group = localStorage.getItem('annotate-form-group');
         var type = localStorage.getItem('annotate-form-type');
@@ -302,7 +353,36 @@ define(['records', 'utils', 'file', './ext/eo-graph'], function(records, utils, 
             dtreeId = fieldcontain.id;
         }
 
-        initDtree(group, type);
+        loadDtree(group, type, function() {
+            $('#dtree-container').popup('open');
+
+            registerOnFinish(function(event) {
+                var graph;
+                var html;
+                var value;
+                var dtree;
+
+                graph = getReprAndValue(eoGraph);
+                value = graph.repr;
+                dtree = JSON.stringify(graph.value);
+
+                html = '<input type="text" ' +
+                              'value="' + value + '" ' +
+                              'data-dtree="' + dtree + '" ' +
+                              'readonly >';
+
+                $(fieldcontain)
+                    .append(html)
+                    .trigger('create');
+
+                $('#dtree-container').popup('close');
+
+                return false;
+            });
+
+            renderPage();
+        });
+
     });
 
     // Dtree from the the capture page
@@ -313,9 +393,54 @@ define(['records', 'utils', 'file', './ext/eo-graph'], function(records, utils, 
         var type = $editor.attr('data-editor-type');
 
         group = group || records.EDITOR_GROUP.DEFAULT;
+        asAForm = true;
 
-        initDtree(group, type);
+        loadDtree(group, type, function() {
+            $('body').pagecontainer('change', 'decision-tree.html', {transition: 'fade'});
+
+            registerOnFinish(function() {
+                records.annotate(dgroup, dtype);
+            });
+        });
     });
+
+    // TODO: do this in a more clean and modular way
+    // Self register as a widget
+    (function() {
+        var WIDGET_NAME = 'dtree';
+
+        var initialize = function(index, item) {
+            // pass
+        };
+
+        var validate = function(html) {
+            return {
+                valid: true,
+                errors: []
+            };
+        };
+
+        var serialize = function(element) {
+            var $el = $(element);
+            var values = [];
+
+            $el.find('input[data-dtree]').each(function(i, item) {
+                values.push(item.value);
+            });
+
+            return {
+                serialize: true,
+                value: JSON.stringify(values)
+            };
+        };
+
+        widgets.registerWidget({
+            name: WIDGET_NAME,
+            initialize: initialize,
+            validate: validate,
+            serialize: serialize
+        });
+    })();
 
     // listen on any page with class sync-page
     $(document).on('_pageshow', '#decision-tree-page', renderPage);

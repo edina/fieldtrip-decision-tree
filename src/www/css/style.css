@@ -1,11 +1,30 @@
-#dtree-next, #dtree-prev {
-    width: 39%;
+#dtree-next, #dtree-prev, #dtree-done {
+    width: 37%;
 }
 
-#dtree-next {
+#dtree-next, #dtree-done {
     float: right;
 }
 
 #dtree-prev {
     float: left;
+}
+
+#dtree-container-popup{
+    max-width: none !important;
+    top: 80px !important;
+    left: 0 !important;
+    height: 60%;
+    width: 100%;
+}
+
+#dtree-container{
+    height: 100%;
+    padding: 20px;
+    overflow-y: scroll;
+}
+
+#dtree-container > form{
+    overflow-y: auto;
+    height: 100%;
 }
