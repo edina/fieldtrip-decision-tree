@@ -368,7 +368,7 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
 
                 html = '<input type="text" ' +
                               'value="' + value + '" ' +
-                              'data-dtree="' + dtree + '" ' +
+                              'data-dtree-value="' + dtree + '" ' +
                               'readonly >';
 
                 $(fieldcontain)
@@ -424,13 +424,14 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
             var $el = $(element);
             var values = [];
 
-            $el.find('input[data-dtree]').each(function(i, item) {
+            $el.find('input[data-dtree-value]').each(function(i, item) {
                 values.push(item.value);
             });
 
             return {
                 serialize: true,
-                value: JSON.stringify(values)
+                value: values,
+                repr: JSON.stringify(values)
             };
         };
 
