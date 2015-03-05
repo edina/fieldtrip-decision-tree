@@ -426,8 +426,13 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
 
     $(document).off('vclick', '.dtree-delete');
     $(document).on('vclick', '.dtree-delete', function(event) {
+        event.stopPropagation();
+        event.preventDefault();
+
         var $target = $(event.currentTarget);
         $target.parent().remove();
+
+        return false;
     });
 
     // Dtree from the the capture page
