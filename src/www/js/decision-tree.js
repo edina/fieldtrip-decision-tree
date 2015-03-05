@@ -392,6 +392,7 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
     $(document).on('vclick', '.annotate-dtree', function(event) {
         event.stopPropagation();
         event.preventDefault();
+        asAForm = false;
 
         var fieldcontain = $(event.target).closest('.fieldcontain').get(0);
         var group = localStorage.getItem('annotate-form-group');
