@@ -185,17 +185,21 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
             next: eoGraph.hasNext()
         };
 
+        // Move this to a better place
+        toggleLongButtons(buttons);
+
         return fieldsetWidget({
             question: node.label,
             fields: renderFieldsToString(node.name, node.edges),
-            buttons: controlButtons(buttons)
-
+            buttons: ''
+            // buttons: controlButtons(buttons)
         });
     };
 
     var renderPage = function() {
         var node;
         var html;
+        console.debug('render');
 
         node = eoGraph.current();
 
@@ -281,7 +285,15 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
     var insertPopupPlaceHolder = function() {
         var $form = $('form');
         var html = '<div id="dtree-container" data-role="popup" data-dismissible="false">' +
-                       '<form id="dtree-form" data-ajax="false" accept-charset="utf-8"></form>' +
+                       '<div id="dtree-long-prev">' +
+                       '<div class="triangle-left"></div>' +
+                       '</div>' +
+                       '<div id="dtree-form-wrapper">' +
+                           '<form id="dtree-form" data-ajax="false" accept-charset="utf-8"></form>' +
+                       '</div>' +
+                       '<div id="dtree-long-next">' +
+                       '<div class="triangle-right"></div>' +
+                       '</div>' +
                    '</div>';
 
         $form.append(html);
@@ -294,43 +306,60 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
 
     records.addDisplayEditorFunction(insertPopupPlaceHolder);
 
-    /*********EVENTS************/
-    $(document).on(
-        'vclick',
-        '#dtree-prev',
-        function(event) {
-            event.stopPropagation();
-            event.preventDefault();
+    var toggleLongButtons = function(buttons) {
+        var triangleLeft = '#dtree-long-prev > .triangle-left';
+        var triangleRight = '#dtree-long-next > .triangle-right';
 
-            eoGraph.previous();
-            renderPage();
-
-            return false;
+        if (buttons.previous) {
+            $(triangleLeft).removeClass('inactive');
         }
-    );
-    $(document).on(
-        'vclick',
-        '#dtree-next',
-        function(event) {
-            event.stopPropagation();
-            event.preventDefault();
+        else {
+            $(triangleLeft).addClass('inactive');
+        }
+        if (buttons.next) {
+            $(triangleRight).removeClass('inactive');
+        }
+        else {
+            $(triangleRight).addClass('inactive');
+        }
+    };
 
-            var answers = $('form#dtree-form').serializeArray();
-            if (answers.length === 1) {
-                eoGraph.next(answers[0].value);
-                if (eoGraph.hasNext()) {
-                    renderPage();
-                }
-                else {
-                    utils.doCallback(onFinishDtree);
-                }
+    var doNext = function(event) {
+        event.stopPropagation();
+        event.preventDefault();
+
+        var answers = $('form#dtree-form').serializeArray();
+        if (answers.length === 1) {
+            eoGraph.next(answers[0].value);
+            if (eoGraph.hasNext()) {
+                renderPage();
             }
             else {
-                popup('Please answer all the questions');
+                utils.doCallback(onFinishDtree);
             }
-            return false;
         }
-    );
+        else {
+            popup('Please answer all the questions');
+        }
+        return false;
+    };
+
+    var doPrev = function(event) {
+        event.stopPropagation();
+        event.preventDefault();
+
+        eoGraph.previous();
+        renderPage();
+
+        return false;
+    };
+
+    /*********EVENTS************/
+    $(document).on('vclick', '#dtree-prev', doPrev);
+    $(document).on('vclick', '#dtree-next', doNext);
+
+    $(document).on('vclick', '#dtree-long-prev', doPrev);
+    $(document).on('vclick', '#dtree-long-next', doNext);
 
     $(document).off('vclick', '#dtree-done');
     $(document).on(
