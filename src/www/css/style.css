@@ -28,3 +28,27 @@
     overflow-y: auto;
     height: 100%;
 }
+
+a.annotate-dtree {
+   width: 50%;
+}
+
+.dtree-value,
+.dtree-delete
+{
+    margin: 0px;
+    padding: 0px;
+    border: 0px none;
+    float: left;
+    min-height: 1px;
+    box-sizing: border-box;
+}
+
+.dtree-value {
+    width: 90%;
+}
+
+.dtree-delete {
+    width: 10%;
+    padding: 2px 0;
+}

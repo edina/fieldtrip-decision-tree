@@ -80,6 +80,23 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
         '<% } %>'
     );
 
+    var inputValue = _.template(
+        '<div>' +
+            '<div class="dtree-value">' +
+                '<input type="text" ' +
+                       'id="dtree-value"' +
+                       'value="<%= value %>" ' +
+                       'data-dtree-value="<%= dtree %>" ' +
+                       'readonly >' +
+            '</div>' +
+            '<div class="dtree-delete">' +
+                '<a href="#" data-role="button" ' +
+                            'data-iconpos="notext" ' +
+                            'data-icon="delete"></a>' +
+            '</div>' +
+        '</div>'
+    );
+
     var formatEdge = function(edge) {
         return {
             id: edge.nodeId,
@@ -114,8 +131,8 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
 
         if (eoGraph !== undefined && asAForm) {
             graph = getReprAndValue(eoGraph);
-            field.dtree = graph.value;
-            field.val = graph.repr;
+            field.repr = graph.repr;
+            field.val = [graph.repr];
 
             annotation.record.properties.fields.push(field);
         }
@@ -261,18 +278,6 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
     // Add the plugin editor process to the pipeline
     records.addProcessEditor(processEditor);
 
-    var createButton = function() {
-        $.each($('.button-dtree'), function(index, input) {
-            var btn = '<div id="annotate-dtree-' + index + '">' +
-                          '<a class="annotate-dtree" href="#">' +
-                              '<img src="' + pluginRoot + 'css/images/eo.png">' +
-                          '</a>' +
-                      '</div>';
-
-            $(input).append(btn);
-        });
-    };
-
     var insertPopupPlaceHolder = function() {
         var $form = $('form');
         var html = '<div id="dtree-container" data-role="popup" data-dismissible="false">' +
@@ -287,7 +292,6 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
         onFinishDtree = func;
     };
 
-    records.addDisplayEditorFunction(createButton);
     records.addDisplayEditorFunction(insertPopupPlaceHolder);
 
     /*********EVENTS************/
@@ -343,11 +347,12 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
     );
 
     // Dtree from a button inside an editor
-    $('.annotate-dtree').unbind();
+    $('body').off('vclick', '.annotate-dtree');
     $('body').on('vclick', '.annotate-dtree', function(event) {
         var fieldcontain = $(event.target).closest('.fieldcontain').get(0);
         var group = localStorage.getItem('annotate-form-group');
         var type = localStorage.getItem('annotate-form-type');
+        var $fieldcontain = $(fieldcontain);
 
         if (fieldcontain && fieldcontain.id) {
             dtreeId = fieldcontain.id;
@@ -361,18 +366,23 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
                 var html;
                 var value;
                 var dtree;
+                var label;
 
                 graph = getReprAndValue(eoGraph);
                 value = graph.repr;
                 dtree = JSON.stringify(graph.value);
+                label = $fieldcontain
+                            .find('label[for="' + fieldcontain.id + '"]')
+                            .text();
 
-                html = '<input type="text" ' +
-                              'value="' + value + '" ' +
-                              'data-dtree-value="' + dtree + '" ' +
-                              'readonly >';
+                html = inputValue({
+                    label: label,
+                    value: value,
+                    dtree: dtree
+                });
 
-                $(fieldcontain)
-                    .append(html)
+                $(html)
+                    .insertBefore('.button-dtree', fieldcontain)
                     .trigger('create');
 
                 $('#dtree-container').popup('close');
@@ -385,8 +395,14 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
 
     });
 
+    $(document).off('vclick', '.dtree-delete');
+    $(document).on('vclick', '.dtree-delete', function(event) {
+        var $target = $(event.currentTarget);
+        $target.parent().remove();
+    });
+
     // Dtree from the the capture page
-    $('.annotate-dtree-form').unbind();
+    $('body').off('click', '.annotate-dtree-form');
     $('body').on('click', '.annotate-dtree-form', function(event) {
         var $editor = $(event.currentTarget);
         var group = $editor.attr('data-editor-group');
@@ -406,11 +422,23 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
 
     // TODO: do this in a more clean and modular way
     // Self register as a widget
+
     (function() {
         var WIDGET_NAME = 'dtree';
 
-        var initialize = function(index, item) {
-            // pass
+        var initialize = function(index, element) {
+            var $el = $(element);
+
+            $.each($('.button-dtree', element), function(index, input) {
+
+                var btn = '<a class="annotate-dtree" data-role="button" href="#">' +
+                              'Add ' +
+                          '</a>';
+
+                $(input)
+                    .append(btn)
+                    .trigger('create');
+            });
         };
 
         var validate = function(html) {
@@ -423,13 +451,17 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
         var serialize = function(element) {
             var $el = $(element);
             var values = [];
+            var label;
 
             $el.find('input[data-dtree-value]').each(function(i, item) {
                 values.push(item.value);
             });
 
+            label = $el.find('label[for="' + element.id + '"]').text();
+
             return {
                 serialize: true,
+                label: label,
                 value: values,
                 repr: JSON.stringify(values)
             };
