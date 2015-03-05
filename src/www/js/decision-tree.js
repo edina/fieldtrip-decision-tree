@@ -382,8 +382,11 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
     );
 
     // Dtree from a button inside an editor
-    $('body').off('vclick', '.annotate-dtree');
-    $('body').on('vclick', '.annotate-dtree', function(event) {
+    $(document).off('vclick', '.annotate-dtree');
+    $(document).on('vclick', '.annotate-dtree', function(event) {
+        event.stopPropagation();
+        event.preventDefault();
+
         var fieldcontain = $(event.target).closest('.fieldcontain').get(0);
         var group = localStorage.getItem('annotate-form-group');
         var type = localStorage.getItem('annotate-form-type');
@@ -429,6 +432,7 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
             renderPage();
         });
 
+        return false;
     });
 
     $(document).off('vclick', '.dtree-delete');
