@@ -213,6 +213,11 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
     /* popup a msg */
     var popup = function(msg) {
         $('#popup-text').html(msg);
+        $('#dtree-message')
+            .html(msg)
+            .slideDown()
+            .delay(2000)
+            .slideUp();
         $('#dtree-popup').popup('open');
     };
 
@@ -285,6 +290,7 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
     var insertPopupPlaceHolder = function() {
         var $form = $('form');
         var html = '<div id="dtree-container" data-role="popup" data-dismissible="false">' +
+                       '<div id="dtree-message" style="display: none;"></div>' +
                        '<div id="dtree-long-prev">' +
                        '<div class="triangle-left"></div>' +
                        '</div>' +
