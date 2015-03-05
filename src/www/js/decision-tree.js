@@ -388,12 +388,13 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
         var group = localStorage.getItem('annotate-form-group');
         var type = localStorage.getItem('annotate-form-type');
         var $fieldcontain = $(fieldcontain);
+        var dtreeFile = $fieldcontain.find("input:hidden").data("dtree");
 
         if (fieldcontain && fieldcontain.id) {
             dtreeId = fieldcontain.id;
         }
 
-        loadDtree(group, type, function() {
+        loadDtree(group, dtreeFile, function() {
             $('#dtree-container').popup('open');
 
             registerOnFinish(function(event) {
@@ -417,7 +418,7 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
                 });
 
                 $(html)
-                    .insertBefore('.button-dtree', fieldcontain)
+                    .insertBefore('#'+fieldcontain.id+' .button-dtree')
                     .trigger('create');
 
                 $('#dtree-container').popup('close');
