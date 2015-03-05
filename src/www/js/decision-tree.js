@@ -180,19 +180,25 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
     };
 
     var renderFieldSetToString = function(node) {
+        var buttonsHtml = '';
         var buttons = {
             previous: eoGraph.hasPrevious(),
             next: eoGraph.hasNext()
         };
 
-        // Move this to a better place
-        toggleLongButtons(buttons);
+        // TODO: Fix this adding the side buttons to the standalone dtree template
+        if (asAForm === true) {
+            buttonsHtml = controlButtons(buttons);
+        }
+        else {
+            // Move this to a better place
+            toggleLongButtons(buttons);
+        }
 
         return fieldsetWidget({
             question: node.label,
             fields: renderFieldsToString(node.name, node.edges),
-            buttons: ''
-            // buttons: controlButtons(buttons)
+            buttons: buttonsHtml
         });
     };
 
