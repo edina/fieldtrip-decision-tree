@@ -85,16 +85,14 @@ a.annotate-dtree {
 .triangle-right,
 .triangle-left
 {
-    position: absolute;
+    position: relative;
     top: 50%;
-    width: 0;
     height: 0;
 }
 
 .triangle-right:after {
     content: "";
     display: block;
-    width: 0;
     height: 0;
     margin-top: 0px;
     margin-left: 0px;
@@ -106,10 +104,9 @@ a.annotate-dtree {
 .triangle-left:after {
     content: "";
     display: block;
-    width: 0;
     height: 0;
     margin-top: 0px;
-    margin-left: 0px;
+    margin-left: -15px;
     border-top: 15px solid transparent;
     border-bottom: 15px solid transparent;
     border-right:15px solid #639e42;
