@@ -514,8 +514,7 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
             return {
                 serialize: true,
                 label: label,
-                value: values,
-                repr: JSON.stringify(values)
+                value: values
             };
         };
 
