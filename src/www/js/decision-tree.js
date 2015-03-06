@@ -131,7 +131,7 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
 
         if (eoGraph !== undefined && asAForm) {
             graph = getReprAndValue(eoGraph);
-            field.repr = graph.repr;
+            //field.repr = graph.repr;
             field.val = [graph.repr];
 
             annotation.record.properties.fields.push(field);
@@ -514,8 +514,8 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
             return {
                 serialize: true,
                 label: label,
-                value: values,
-                repr: JSON.stringify(values)
+                value: values
+                //repr: JSON.stringify(values)
             };
         };
 
