@@ -69,6 +69,10 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
         '<input type="range" name="<%= name %>" id="slider-<%- id %>" value="<%- value %>" min="<%- min %>" max="<%- max %>">'
     );
 
+    var textboxWidget = _.template(
+        '<input type="text" name="<%= name %>"></input>'
+    );
+
     var controlButtons = _.template(
         '<% if (previous === true) { %>' +
         '<a href="#" id="dtree-prev" data-role="button" data-mini="true" data-inline="true"><< Prev</a>' +
@@ -162,6 +166,11 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
                         min: edge.element.options.min,
                         max: edge.element.options.max,
                         value: edge.element.options.value
+                    });
+                break;
+                case 'textbox':
+                    fields += textboxWidget({
+                        name: edge.element.name
                     });
                 break;
                 default:
