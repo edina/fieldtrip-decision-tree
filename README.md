@@ -16,10 +16,3 @@ Decision Tree is a plugin for creating questionnaires that follow a tree structu
 </div>
 ```
 
-
-## Release instructions
-
-For releasing the app:
-```
-npm run release
-```
