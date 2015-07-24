@@ -64,13 +64,26 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
         '>'
     );
 
+    var checkboxWidget = _.template(
+        '<label for="checkbox-<%- id %>"><%- label %></label>' +
+        '<input ' +
+            'name="<%= name %>" ' +
+            'id="checkbox-<%= id %>" ' +
+            'value="<%= value %>" ' +
+            'type="checkbox" ' +
+            '<% if (required === true) { %>required="required"<% } %> ' +
+            '<% if (checked === true) { %>checked="checked"<% } %> ' +
+        '>'
+    );
+
     var rangeWidget = _.template(
         '<label for="slider-<%- id %>">Input slider:</label>' +
         '<input type="range" name="<%= name %>" id="slider-<%- id %>" value="<%- value %>" min="<%- min %>" max="<%- max %>">'
     );
 
     var textboxWidget = _.template(
-        '<input type="text" name="<%= name %>"></input>'
+        '<label for="text-<%- id %>"><%- label %></label>' +
+        '<input type="text" name="<%= name %> id="text-<%- id %>"></input>'
     );
 
     var controlButtons = _.template(
@@ -170,7 +183,19 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
                 break;
                 case 'textbox':
                     fields += textboxWidget({
-                        name: edge.element.name
+                        id: i,
+                        label: edge.label,
+                        name: name
+                    });
+                break;
+                case 'checkbox':
+                    fields += checkboxWidget({
+                        id: i,
+                        name: name,
+                        label: edge.label,
+                        required: false,
+                        checked: false,
+                        value: edge.element.options.value
                     });
                 break;
                 default:
@@ -350,7 +375,10 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
         event.preventDefault();
 
         var answers = $('form#dtree-form').serializeArray();
-        if (answers.length === 1) {
+        if (answers.length === 0) {
+            popup('Please answer all the questions');
+        }
+        else if (answers.length === 1) {
             eoGraph.next(answers[0].value);
             if (eoGraph.hasNext()) {
                 renderPage();
@@ -360,8 +388,15 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
             }
         }
         else {
-            popup('Please answer all the questions');
+            eoGraph.next(answers.map(function(kv) {return kv.value;}));
+            if (eoGraph.hasNext()) {
+                renderPage();
+            }
+            else {
+                utils.doCallback(onFinishDtree);
+            }
         }
+
         return false;
     };
 
