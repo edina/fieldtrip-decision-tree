@@ -73,6 +73,10 @@ a.annotate-dtree {
     overflow-y: auto;
 }
 
+#dtree-form-wrapper img{
+    width: 100%;
+}
+
 #dtree-long-prev,
 #dtree-long-next
 {
@@ -134,3 +138,12 @@ a.annotate-dtree {
     border-top-right-radius: .6em;
 }
 
+.info p {
+    color: #b94a48;
+    background-color: #f2dede;
+    border-color: #eed3d7;
+}
+
+.info img{
+    width: 100%;
+}

@@ -31,9 +31,11 @@ DAMAGE.
 
 'use strict';
 
+
 /* global _ */
 
-define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(records, utils, file, widgets, EOGraph) { // jshint ignore:line
+define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'],
+       function(records, utils, file, widgets, EOGraph) { // jshint ignore:line
     var dgroup, dtype;
     var eoGraph;
     var asAForm = false; // Flag to ignore the records.EVT_EDIT_ANNOTATION event
@@ -43,9 +45,11 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
     var pluginRoot = 'plugins/decision-tree/';
 
     var dtreeId = 'fieldcontain-dtree-1';
+    var assetsDirURL;
 
     var fieldsetWidget = _.template(
         '<fieldset data-role="controlgroup" data-theme="b">' +
+            '<%= info %>' +
             '<legend><%- question %></legend>' +
             '<%= fields %>' +
         '</fieldset>' +
@@ -61,7 +65,8 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
             'type="radio" ' +
             '<% if (required === true) { %>required="required"<% } %> ' +
             '<% if (checked === true) { %>checked="checked"<% } %> ' +
-        '>'
+        '>' +
+        '<% if (image !== undefined) { %> <img src="<%- path%>/<%- image %>"><% } %> '
     );
 
     var checkboxWidget = _.template(
@@ -114,6 +119,8 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
         '</div>'
     );
 
+    var infoWidget = _.template('<div class="info"><p><%=info%></p></div>');
+
     var formatEdge = function(edge) {
         return {
             id: edge.nodeId,
@@ -153,6 +160,16 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
 
             annotation.record.properties.fields.push(field);
         }
+    };
+
+    var renderInfo = function(node) {
+        if("info" in node && node.info !== undefined) {
+            if(utils.endsWith(node.info, ".png")) {
+                node.info = '<img src="'+assetsDirURL + '/' + node.info+'">';
+            }
+            return infoWidget({"name": node.name, "info": node.info});
+        }
+        return '';
     };
 
     var renderFieldsToString = function(name, edges) {
@@ -205,7 +222,9 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
                         label: edge.label,
                         required: false,
                         checked: false,
-                        value: edge.value
+                        value: edge.value,
+                        path: assetsDirURL,
+                        image: edge.image
                     });
             }
         }
@@ -232,7 +251,8 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
         return fieldsetWidget({
             question: node.label,
             fields: renderFieldsToString(node.name, node.edges),
-            buttons: buttonsHtml
+            buttons: buttonsHtml,
+            info: renderInfo(node)
         });
     };
 
@@ -269,10 +289,17 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
         var url;
 
         if (group ===  records.EDITOR_GROUP.DEFAULT) {
-            url = 'editors/' + type.replace(/.edtr$/, '.json');
+            url = 'editors/' + type.replace(/.edtr$/, ".json");
         }
         else {
-            url = file.getFilePath(records.getEditorsDir(group)) + '/' + type.replace(/.edtr$/, '.json');
+            if(utils.endsWith(type, ".zip")){
+                type = type.replace(/.zip$/, "");
+                assetsDirURL = file.getFilePath(records.getEditorsDir(group)) + type.substr(0, type.lastIndexOf("-")) + '/'+ type;
+                url = assetsDirURL + '/' + type +".json";
+            }
+            else{
+                url = file.getFilePath(records.getEditorsDir(group)) + '/' + type.replace(/.edtr$/, ".json");
+            }
         }
         dgroup = group;
         dtype = type;
@@ -336,6 +363,7 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(recor
                        '</div>' +
                        '<div id="dtree-form-wrapper">' +
                            '<form id="dtree-form" data-ajax="false" accept-charset="utf-8"></form>' +
+                           '<div id="dtree-info" style="display: none;"></div>' +
                        '</div>' +
                        '<div id="dtree-long-next">' +
                        '<div class="triangle-right"></div>' +
