@@ -289,6 +289,7 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'],
         var url;
 
         if (group ===  records.EDITOR_GROUP.DEFAULT) {
+            assetsDirURL = 'editors/' + type.replace(/.json$/, "");
             url = 'editors/' + type.replace(/.edtr$/, ".json");
         }
         else {
