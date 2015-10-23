@@ -1,6 +1,6 @@
 {
   "name": "fieldtrip-decision-tree",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "A fieldtrip plugin for making decision tree questions",
   "main": "src/www/js/dtree.js",
   "scripts": {
