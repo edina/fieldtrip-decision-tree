@@ -408,6 +408,16 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'],
             popup('Please answer all the questions');
         }
         else if (answers.length === 1) {
+            var current = eoGraph.current();
+            if("action" in current && current.action !== undefined) {
+                if(current.action === "image") {
+                    records.takePhoto(function(url){
+                        var id = $("#annotate-page").find('.image-chooser').attr('id');
+                        $("#"+id).append('<div class="annotate-image"><img src="' +
+                          url + '"</img></div>');
+                    });
+                }
+            }
             eoGraph.next(answers[0].value);
             if (eoGraph.hasNext()) {
                 renderPage();
