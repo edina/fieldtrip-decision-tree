@@ -601,11 +601,27 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'],
             };
         };
 
+        var deserialize = function(obj) {
+            if(obj.val && obj.val.length > 0) {
+                var html = inputValue({
+                    label: obj.label,
+                    value: obj.val.join(","),
+                    dtree: obj.val.join(",")
+                });
+
+                $(html).insertBefore('#'+obj.id+' .button-dtree').trigger('create');
+            }
+            return {
+                deserialize: true
+            };
+        };
+
         widgets.registerWidget({
             name: WIDGET_NAME,
             initialize: initialize,
             validate: validate,
-            serialize: serialize
+            serialize: serialize,
+            deserialize: deserialize
         });
     })();
 
