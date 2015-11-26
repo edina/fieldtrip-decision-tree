@@ -611,9 +611,6 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'],
 
                 $(html).insertBefore('#'+obj.id+' .button-dtree').trigger('create');
             }
-            return {
-                deserialize: true
-            };
         };
 
         widgets.registerWidget({
