@@ -34,8 +34,8 @@ DAMAGE.
 
 /* global _ */
 
-define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'],
-       function(records, utils, file, widgets, EOGraph) { // jshint ignore:line
+define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(// jshint ignore:line
+    records, utils, file, widgets, EOGraph) {
     var dgroup, dtype;
     var eoGraph;
     var asAForm = false; // Flag to ignore the records.EVT_EDIT_ANNOTATION event
@@ -353,7 +353,8 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'],
     };
 
     // Add the plugin editor process to the pipeline
-    records.addProcessEditor(processEditor);
+    // remove for time-being
+    //records.addProcessEditor(processEditor);
 
     var insertPopupPlaceHolder = function() {
         var $form = $('form');
