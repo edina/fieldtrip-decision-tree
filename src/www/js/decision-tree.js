@@ -88,8 +88,12 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'],
 
     var textboxWidget = _.template(
         '<label for="text-<%- id %>"><%- label %></label>' +
-        '<input type="text" name="<%= name %> id="text-<%- id %>"></input>'
+        '<input type="text" name="<%= name %>" id="text-<%- id %>"></input>'
     );
+
+    var textWidget = _.template('<p><%- text %></p>'+
+        '<label for="text-<%- id %>"><%- label %></label>' +
+        '<input type="radio" name="<%= name %>" id="text-<%- id %>" value="Carry on">');
 
     var controlButtons = _.template(
         '<% if (previous === true) { %>' +
@@ -196,6 +200,14 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'],
                         min: edge.element.options.min,
                         max: edge.element.options.max,
                         value: edge.element.options.value
+                    });
+                break;
+                case 'text':
+                    fields += textWidget({
+                        id: i,
+                        label: "I agree",
+                        name: name,
+                        text: edge.label
                     });
                 break;
                 case 'textbox':
@@ -402,13 +414,14 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'],
     var doNext = function(event) {
         event.stopPropagation();
         event.preventDefault();
+        var current;
 
         var answers = $('form#dtree-form').serializeArray();
         if (answers.length === 0) {
             popup('Please answer all the questions');
         }
         else if (answers.length === 1) {
-            var current = eoGraph.current();
+            current = eoGraph.current();
             if("action" in current && current.action !== undefined) {
                 if(current.action === "image") {
                     records.takePhoto(function(url){
@@ -427,12 +440,31 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'],
             }
         }
         else {
-            eoGraph.next(answers.map(function(kv) {return kv.value;}));
-            if (eoGraph.hasNext()) {
-                renderPage();
+            var goNext = true;
+            current = eoGraph.current();
+            answers.map(function(kv) {return kv.value;});
+            var onlySelection = "only_selection";
+            for(var i=0; i<answers.length; i++) {
+                if(answers[i].value === onlySelection){
+                    goNext = false;
+                    for(var j=0;j<current.edges.length; j++) {
+                        if (current.edges[j].element.options.value === onlySelection) {
+                            popup('The choice '+current.edges[j].label+
+                                  ' should be selected on its own');
+                            break;
+                        }
+                    }
+                    break;
+                }
             }
-            else {
-                utils.doCallback(onFinishDtree);
+            if(goNext) {
+                eoGraph.next(answers);
+                if (eoGraph.hasNext()) {
+                    renderPage();
+                }
+                else {
+                    utils.doCallback(onFinishDtree);
+                }
             }
         }
 
