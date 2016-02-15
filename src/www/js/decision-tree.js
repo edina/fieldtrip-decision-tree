@@ -81,6 +81,11 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(// js
         '>'
     );
 
+    var infoWidget = _.template(
+      '<input type="hidden" name="<%= name %>" value="<%= value %>" />' +
+      '<div><%= text %></div>'
+    );
+
     var rangeWidget = _.template(
         '<label for="slider-<%- id %>">Input slider:</label>' +
         '<input type="range" name="<%= name %>" id="slider-<%- id %>" value="<%- value %>" min="<%- min %>" max="<%- max %>">'
@@ -123,7 +128,8 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(// js
         '</div>'
     );
 
-    var infoWidget = _.template('<div class="info"><p><%=info%></p></div>');
+    var infoQuestionWidget =
+        _.template('<div class="info"><p><%=info%></p></div>');
 
     var formatEdge = function(edge) {
         return {
@@ -171,7 +177,7 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(// js
             if(utils.endsWith(node.info, ".png")) {
                 node.info = '<img src="'+assetsDirURL + '/' + node.info+'">';
             }
-            return infoWidget({"name": node.name, "info": node.info});
+            return infoQuestionWidget({"name": node.name, "info": node.info});
         }
         return '';
     };
@@ -225,6 +231,13 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(// js
                         required: false,
                         checked: false,
                         value: edge.element.options.value
+                    });
+                break;
+                case 'info':
+                    fields += infoWidget({
+                        name: name,
+                        text: edge.element.options.text,
+                        value: edge.value
                     });
                 break;
                 default:
