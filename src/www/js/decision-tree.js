@@ -33,8 +33,8 @@ DAMAGE.
 
 
 /* global _ */
-
-define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(// jshint ignore:line
+/* jshint ignore:start */
+define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(/* jshint ignore:end */
     records, utils, file, widgets, EOGraph) {
     var dgroup, dtype;
     var eoGraph;
@@ -44,7 +44,7 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(// js
 
     var pluginRoot = 'plugins/decision-tree/';
 
-    var dtreeId = 'fieldcontain-dtree-1';
+    var dtreeId = 'dtree-1';
     var assetsDirURL;
 
     var fieldsetWidget = _.template(
@@ -366,7 +366,7 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(// js
 
     // Add the plugin editor process to the pipeline
     // remove for time-being
-    //records.addProcessEditor(processEditor);
+    records.addProcessEditor(processEditor);
 
     var insertPopupPlaceHolder = function() {
         var $form = $('form');
