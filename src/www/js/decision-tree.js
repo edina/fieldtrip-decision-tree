@@ -472,7 +472,7 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(/* js
                 }
             }
             if(goNext) {
-                eoGraph.next(answers);
+                 eoGraph.next(answers.map(function(kv) {return kv.value;}));
                 if (eoGraph.hasNext()) {
                     renderPage();
                 }
