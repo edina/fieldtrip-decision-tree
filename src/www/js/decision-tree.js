@@ -33,8 +33,7 @@ DAMAGE.
 
 
 /* global _ */
-/* jshint ignore:start */
-define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(/* jshint ignore:end */
+define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(// jshint ignore:line
     records, utils, file, widgets, EOGraph) {
     var dgroup, dtype;
     var eoGraph;
@@ -320,8 +319,9 @@ define(['records', 'utils', 'file', 'widgets', './ext/eo-graph'], function(/* js
         else {
             if(utils.endsWith(type, ".zip")){
                 type = type.replace(/.zip$/, "");
-                assetsDirURL = file.getFilePath(records.getEditorsDir(group)) + type.substr(0, type.lastIndexOf("-")) + '/'+ type;
-                url = assetsDirURL + '/' + type +".json";
+                var dtreeFilename = type.substr(type.lastIndexOf("/"), type.length);
+                assetsDirURL = file.getFilePath(records.getEditorsDir(group)) + '/'+ type;
+                url = assetsDirURL + '/' + dtreeFilename +".json";
             }
             else{
                 url = file.getFilePath(records.getEditorsDir(group)) + '/' + type.replace(/.edtr$/, ".json");
